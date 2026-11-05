@@ -1,0 +1,29 @@
+version: 1
+project:
+  title: Eight ML Algorithms, Slowed Down
+  description: A companion book to an "8 algorithms in under 60 seconds" video, with from-scratch code and sample data.
+  keywords: [machine learning, scikit-learn, numpy, tutorial]
+  license:
+    content: CC-BY-4.0
+    code: MIT
+  github: https://github.com/__OWNER__/__REPO__
+  jupyter: false
+  exports: []
+  toc:
+    - file: intro.md
+    - file: notebooks/00_sample_data.ipynb
+    - title: The eight algorithms
+      children:
+        - file: notebooks/01_linear_regression.ipynb
+        - file: notebooks/02_logistic_regression.ipynb
+        - file: notebooks/03_decision_tree.ipynb
+        - file: notebooks/04_random_forest.ipynb
+        - file: notebooks/05_gradient_boosting.ipynb
+        - file: notebooks/06_knn.ipynb
+        - file: notebooks/07_kmeans.ipynb
+        - file: notebooks/08_neural_network.ipynb
+    - file: notebooks/09_comparison.ipynb
+site:
+  template: book-theme
+  options:
+    folders: true

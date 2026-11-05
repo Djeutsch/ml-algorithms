@@ -1,0 +1,10 @@
+# %% tags=["remove-cell"]
+import sys, warnings
+sys.path.insert(0, "..")
+warnings.filterwarnings("ignore")
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from ml8 import data, models, scratch, plotting as P
+P.use_style()
+pd.set_option("display.precision", 4)

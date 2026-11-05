@@ -1,0 +1,1205 @@
+<meta name="dash-one-writer">
+<style>
+  .ml8 {
+    --ml-c0: color-mix(in srgb, #3a98d4 82%, var(--color-fg));
+    --ml-c1: color-mix(in srgb, #e5603f 84%, var(--color-fg));
+    --ml-hi: color-mix(in srgb, #e9b400 72%, var(--color-fg));
+    --ml-f-lin: var(--ml-c0);
+    --ml-f-tree: color-mix(in srgb, #4f9e4a 84%, var(--color-fg));
+    --ml-f-dist: color-mix(in srgb, #9a6fe0 84%, var(--color-fg));
+    --ml-f-nn: var(--ml-hi);
+    font-family: var(--font-sans);
+    display: flex; flex-direction: column; gap: var(--cds-gap-xl);
+    max-width: 80rem; margin-inline: auto;
+  }
+  .ml8 .ml-head { display: flex; flex-direction: column; gap: var(--cds-gap-sm); }
+  .ml8 .ml-title { font-family: var(--font-serif); font-weight: 400; font-size: var(--cds-font-size-title); margin: 0; text-wrap: balance; }
+  .ml8 .ml-lede { margin: 0; color: var(--color-fg-muted); max-width: 46rem; line-height: 1.5; }
+  .ml8 .ml-lede b, .ml8 .ml-stat b { font-weight: 600; font-variant-numeric: tabular-nums; }
+  .ml8 .ml-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr)); gap: var(--cds-gap-md); }
+  .ml8 .ml-card { background: var(--color-panel); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); padding: var(--cds-pad-lg); display: flex; flex-direction: column; gap: var(--cds-gap-sm); min-width: 0; }
+  .ml8 .ml-card h2, .ml8 .ml-card h3 { margin: 0; font-size: var(--cds-font-size-heading); font-weight: var(--cds-font-weight-medium); }
+  .ml8 .ml-note { margin: 0; color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); line-height: 1.45; }
+  .ml8 .ml-section-title { margin: 0; font-size: var(--cds-font-size-heading); font-weight: var(--cds-font-weight-medium); }
+  .ml8 .ml-chart { position: relative; min-height: 12rem; min-width: 0; }
+  .ml8 .ml-chart.ml-square { min-height: 16rem; }
+  .ml8 .ml-chart svg { display: block; overflow: visible; }
+  .ml8 .ml-chart text { fill: var(--color-fg-muted); font-size: 11px; font-family: var(--font-sans); }
+  .ml8 .ml-chart .domain, .ml8 .ml-chart .tick line { stroke: var(--cds-chart-axis); }
+  .ml8 .ml-chart .ml-gridline { stroke: var(--cds-chart-grid); }
+  .ml8 .ml-failed { display: flex; align-items: center; justify-content: center; gap: var(--cds-gap-xs); min-height: inherit; height: 100%; color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); }
+  .ml8 .ml-failed::before { content: ""; width: .375rem; height: .375rem; border-radius: 50%; background: var(--color-bad); }
+  .ml8 .ml-tip { position: absolute; pointer-events: none; background: var(--cds-surface-popover); border: 1px solid var(--cds-border); border-radius: var(--cds-radius); box-shadow: var(--cds-shadow-popover); padding: var(--cds-pad-xs) var(--cds-pad-sm); font-size: var(--cds-font-size-caption); white-space: nowrap; z-index: 2; font-variant-numeric: tabular-nums; }
+  .ml8 .ml-tip .ml-tip-k { color: var(--cds-text-secondary); }
+
+  /* table */
+  .ml8 .ml-table-wrap { overflow: auto; max-height: 24rem; }
+  .ml8 table.ml-table { width: 100%; border-collapse: collapse; font-size: var(--cds-font-size-caption); font-variant-numeric: tabular-nums; }
+  .ml8 .ml-table th { text-align: left; font-weight: var(--cds-font-weight-medium); color: var(--color-fg-muted); padding: var(--cds-pad-xs) var(--cds-pad-sm); border-bottom: 1px solid var(--color-border-line); position: sticky; top: 0; background: var(--color-panel); }
+  .ml8 .ml-table td { padding: var(--cds-pad-xs) var(--cds-pad-sm); border-bottom: 1px solid var(--color-border-line); vertical-align: top; }
+  .ml8 .ml-table .ml-num { text-align: right; }
+  .ml8 .ml-fam { display: inline-flex; align-items: center; gap: .4em; }
+  .ml8 .ml-fam::before { content: ""; width: .6em; height: .6em; border-radius: 2px; background: var(--fam, var(--color-fg-muted)); }
+
+  /* algorithm picker: the video's 4 x 2 button grid */
+  .ml8 .ml-picker { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--cds-gap-sm); }
+  @media (max-width: 30rem) { .ml8 .ml-picker { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  .ml8 .ml-tab { --fam: var(--color-fg-muted); appearance: none; font: inherit; font-size: var(--cds-font-size-caption); font-weight: var(--cds-font-weight-medium); color: var(--color-fg); background: transparent; border: 1.5px solid color-mix(in srgb, var(--fam) 55%, transparent); border-radius: var(--cds-radius); padding: var(--cds-pad-sm) var(--cds-pad-xs); cursor: pointer; transition: background-color .15s, border-color .15s; }
+  .ml8 .ml-tab:hover { border-color: var(--fam); }
+  .ml8 .ml-tab[aria-selected="true"] { background: color-mix(in srgb, var(--fam) 22%, transparent); border-color: var(--fam); }
+  .ml8 .ml-tab:focus-visible, .ml8 .ml-chip:focus-visible, .ml8 .ml-play:focus-visible { outline: 2px solid var(--fam, var(--color-fg)); outline-offset: 2px; }
+  .ml8 [data-fam="lin"] { --fam: var(--ml-f-lin); }
+  .ml8 [data-fam="tree"] { --fam: var(--ml-f-tree); }
+  .ml8 [data-fam="dist"] { --fam: var(--ml-f-dist); }
+  .ml8 [data-fam="nn"] { --fam: var(--ml-f-nn); }
+  .ml8 .ml-families { display: flex; flex-wrap: wrap; gap: var(--cds-gap-sm) var(--cds-gap-md); font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); margin: 0; padding: 0; list-style: none; }
+
+  /* algorithm panel */
+  .ml8 .ml-panel { display: grid; grid-template-columns: minmax(0, 20rem) minmax(0, 1fr); gap: var(--cds-gap-lg); align-items: start; }
+  @media (max-width: 52rem) { .ml8 .ml-panel { grid-template-columns: minmax(0, 1fr); } }
+  .ml8 .ml-side { display: flex; flex-direction: column; gap: var(--cds-gap-md); min-width: 0; }
+  .ml8 .ml-eyebrow { margin: 0; font-size: var(--cds-font-size-caption); letter-spacing: .04em; text-transform: uppercase; color: var(--fam); font-weight: var(--cds-font-weight-medium); }
+  .ml8 .ml-name { margin: 0; font-family: var(--font-serif); font-weight: 400; font-size: var(--cds-font-size-title); }
+  .ml8 .ml-formula { margin: 0; font-family: "Cambria Math", "STIX Two Math", "Latin Modern Math", Georgia, serif; font-size: 1.35rem; padding: var(--cds-pad-sm) var(--cds-pad-md); border-left: 3px solid var(--fam); background: color-mix(in srgb, var(--fam) 8%, transparent); border-radius: 0 var(--cds-radius) var(--cds-radius) 0; overflow-x: auto; white-space: nowrap; }
+  .ml8 .ml-formula sub, .ml8 .ml-formula sup { font-size: .62em; }
+  .ml8 .ml-text { margin: 0; line-height: 1.5; }
+  .ml8 .ml-control { display: flex; flex-direction: column; gap: var(--cds-gap-xs); }
+  .ml8 .ml-control-label { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+  .ml8 .ml-control-row { display: flex; align-items: center; gap: var(--cds-gap-sm); flex-wrap: wrap; }
+  .ml8 .ml-chips { display: flex; flex-wrap: wrap; gap: var(--cds-gap-xs); }
+  .ml8 .ml-chip { appearance: none; font: inherit; font-size: var(--cds-font-size-caption); font-variant-numeric: tabular-nums; min-width: 2.4rem; padding: .3rem .55rem; border-radius: var(--cds-radius); border: 1px solid var(--color-border-line); background: transparent; color: var(--color-fg); cursor: pointer; }
+  .ml8 .ml-chip[aria-pressed="true"] { border-color: var(--fam); background: color-mix(in srgb, var(--fam) 22%, transparent); }
+  .ml8 .ml-range { width: 100%; accent-color: var(--fam); }
+  .ml8 .ml-range-wrap { flex: 1 1 10rem; display: flex; }
+  .ml8 .ml-play { appearance: none; font: inherit; font-size: var(--cds-font-size-caption); padding: .3rem .7rem; border-radius: var(--cds-radius); border: 1px solid var(--fam); background: transparent; color: var(--color-fg); cursor: pointer; }
+  .ml8 .ml-play[aria-pressed="true"] .ml-play-on, .ml8 .ml-play[aria-pressed="false"] .ml-play-off { display: none; }
+  .ml8 .ml-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(6.5rem, 1fr)); gap: var(--cds-gap-sm); margin: 0; }
+  .ml8 .ml-stat { display: flex; flex-direction: column; gap: 2px; padding: var(--cds-pad-sm); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); min-width: 0; }
+  .ml8 .ml-stat dt { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+  .ml8 .ml-stat dd { margin: 0; font-family: var(--font-serif); font-size: 1.35rem; font-variant-numeric: tabular-nums; }
+  .ml8 .ml-main { display: flex; flex-direction: column; gap: var(--cds-gap-md); min-width: 0; }
+  .ml8 .ml-legend { display: flex; flex-wrap: wrap; gap: var(--cds-gap-sm) var(--cds-gap-md); font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); margin: 0; padding: 0; list-style: none; }
+  .ml8 .ml-key { display: inline-flex; align-items: center; gap: .4em; }
+  .ml8 .ml-key::before { content: ""; width: .7em; height: .7em; border-radius: 50%; background: var(--k); }
+  .ml8 .ml-key.ml-line::before { height: 2px; width: 1.1em; border-radius: 0; }
+  .ml8 .ml-key.ml-ring::before { background: transparent; border: 2px solid var(--k); }
+  .ml8 .ml-key.ml-dash::before { height: 0; width: 1.1em; border-radius: 0; border-top: 2px dashed var(--k); background: transparent; }
+  .ml8 .k-c0 { --k: var(--ml-c0); } .ml8 .k-c1 { --k: var(--ml-c1); } .ml8 .k-hi { --k: var(--ml-hi); }
+  .ml8 .k-tree { --k: var(--ml-f-tree); } .ml8 .k-fg { --k: var(--color-fg-muted); }
+  .ml8 .ml-members { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; min-height: 9rem; }
+  .ml8 .ml-members svg { border-radius: 3px; }
+  .ml8 .ml-two { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr)); gap: var(--cds-gap-md); }
+  .ml8 details.ml-details { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); line-height: 1.5; }
+  .ml8 details.ml-details summary { cursor: pointer; color: var(--color-fg); font-size: var(--cds-font-size-body); }
+  .ml8 details.ml-details dl { display: grid; grid-template-columns: minmax(0, 10rem) minmax(0, 1fr); gap: var(--cds-gap-xs) var(--cds-gap-md); }
+  .ml8 details.ml-details dd { margin: 0; }
+  .ml8 [data-dash-source-state=empty] { color: transparent; }
+  .ml8 [data-dash-source-state=refreshing] { opacity: .5; transition: opacity var(--cds-dur-slow); }
+</style>
+
+<div class="ml8">
+  <header class="ml-head">
+    <h1 class="ml-title" id="top">Eight machine-learning algorithms</h1>
+    <p class="ml-lede">The video walks through eight algorithms in under a minute. Here each one runs on sample data. On the same two-moons sample, the
+      <b data-draw="best-name" data-source="scorecard" data-field="algorithm">—</b> scores highest at
+      <b data-draw="best-acc" data-source="scorecard" data-field="value">—</b> test accuracy and
+      <b data-draw="worst-name" data-source="scorecard" data-field="algorithm">—</b> lowest at
+      <b data-draw="worst-acc" data-source="scorecard" data-field="value">—</b>, because its boundary can only be a straight line.</p>
+  </header>
+
+  <section class="ml-grid" aria-label="Overview">
+    <article class="ml-card" id="accuracy">
+      <h2>Test accuracy on the two-moons sample</h2>
+      <p class="ml-note">Each classifier is trained on the same training points and scored on the held-out points. Axis starts at the lowest score, not zero.</p>
+      <div class="ml-chart" data-draw="acc-dots" data-source="scorecard"></div>
+    </article>
+    <article class="ml-card" id="scorecard">
+      <h2>Scorecard</h2>
+      <p class="ml-note">The headline metric for each algorithm at its default setting on this page. Linear regression and k-means run on other sample data, so their metrics are different measures.</p>
+      <div class="ml-table-wrap">
+        <table class="ml-table" data-source="scorecard" data-row-key="key">
+          <thead><tr>
+            <th data-field="algorithm">Algorithm</th>
+            <th data-field="family">Family</th>
+            <th data-field="metric">Metric</th>
+            <th data-field="value" class="ml-num">Value</th>
+          </tr></thead>
+          <tbody data-draw="score-rows"></tbody>
+        </table>
+      </div>
+    </article>
+  </section>
+
+  <section class="ml-card" id="explorer" aria-label="Algorithm explorer">
+    <h2 class="ml-section-title">Pick an algorithm</h2>
+    <ul class="ml-families">
+      <li class="ml-fam" data-fam="lin">Linear models</li>
+      <li class="ml-fam" data-fam="tree">Tree models</li>
+      <li class="ml-fam" data-fam="dist">Distance-based</li>
+      <li class="ml-fam" data-fam="nn">Neural networks</li>
+    </ul>
+    <div class="ml-picker" role="tablist" aria-label="Algorithms">
+      <button class="ml-tab" role="tab" data-tab="linear" data-fam="lin" aria-selected="true" aria-controls="linear">linear</button>
+      <button class="ml-tab" role="tab" data-tab="logistic" data-fam="lin" aria-selected="false" aria-controls="logistic">logistic</button>
+      <button class="ml-tab" role="tab" data-tab="tree" data-fam="tree" aria-selected="false" aria-controls="tree">tree</button>
+      <button class="ml-tab" role="tab" data-tab="forest" data-fam="tree" aria-selected="false" aria-controls="forest">forest</button>
+      <button class="ml-tab" role="tab" data-tab="boosting" data-fam="tree" aria-selected="false" aria-controls="boosting">boosting</button>
+      <button class="ml-tab" role="tab" data-tab="knn" data-fam="dist" aria-selected="false" aria-controls="knn">KNN</button>
+      <button class="ml-tab" role="tab" data-tab="kmeans" data-fam="dist" aria-selected="false" aria-controls="kmeans">k-means</button>
+      <button class="ml-tab" role="tab" data-tab="nn" data-fam="nn" aria-selected="false" aria-controls="nn">neural net</button>
+    </div>
+
+    <!-- 1. Linear regression -->
+    <section class="ml-panel" id="linear" data-tab="linear" data-fam="lin" role="tabpanel">
+      <div class="ml-side">
+        <p class="ml-eyebrow">Linear models · regression</p>
+        <h3 class="ml-name">Linear regression</h3>
+        <p class="ml-formula"><i>ŷ</i> = <i>w</i><i>x</i> + <i>b</i></p>
+        <p class="ml-text">Fit a straight line by nudging the slope <i>w</i> and intercept <i>b</i> downhill on the mean squared error. The red bars are the residuals being squared.</p>
+        <div class="ml-control">
+          <span class="ml-control-label">Gradient-descent step</span>
+          <div class="ml-control-row">
+            <button class="ml-play" data-play="linear" aria-pressed="false"><span class="ml-play-on">▶ Play</span><span class="ml-play-off">❚❚ Pause</span></button>
+            <div class="ml-range-wrap" data-draw="lin-step" data-source="reg_gd"></div>
+          </div>
+        </div>
+        <dl class="ml-stats">
+          <div class="ml-stat"><dt>Iteration</dt><dd data-draw="lin-iter" data-source="reg_gd" data-field="iter">—</dd></div>
+          <div class="ml-stat"><dt>Slope w</dt><dd data-draw="lin-w" data-source="reg_gd" data-field="w">—</dd></div>
+          <div class="ml-stat"><dt>Intercept b</dt><dd data-draw="lin-b" data-source="reg_gd" data-field="b">—</dd></div>
+          <div class="ml-stat"><dt>Mean squared error</dt><dd data-draw="lin-mse" data-source="reg_gd" data-field="mse">—</dd></div>
+        </dl>
+      </div>
+      <div class="ml-main">
+        <ul class="ml-legend"><li class="ml-key k-c0">Sample points</li><li class="ml-key ml-line k-hi">Current line</li><li class="ml-key ml-line k-c1">Residuals</li></ul>
+        <div class="ml-chart ml-square" data-draw="lin-chart" data-source="reg_points reg_gd"></div>
+        <h4 class="ml-section-title">Error falls as the line settles</h4>
+        <div class="ml-chart" data-draw="lin-loss" data-source="reg_gd"></div>
+      </div>
+    </section>
+
+    <!-- 2. Logistic regression -->
+    <section class="ml-panel" id="logistic" data-tab="logistic" data-fam="lin" role="tabpanel" hidden>
+      <div class="ml-side">
+        <p class="ml-eyebrow">Linear models · classification</p>
+        <h3 class="ml-name">Logistic regression</h3>
+        <p class="ml-formula"><i>p</i> = <i>σ</i>(<i>w</i><i>x</i> + <i>b</i>)</p>
+        <p class="ml-text">Squash the same straight line through the sigmoid <i>σ</i> so the output is a probability between 0 and 1. The dashed line is where <i>p</i> crosses one half: the decision boundary.</p>
+        <div class="ml-control">
+          <span class="ml-control-label">Gradient-descent step</span>
+          <div class="ml-control-row">
+            <button class="ml-play" data-play="logistic" aria-pressed="false"><span class="ml-play-on">▶ Play</span><span class="ml-play-off">❚❚ Pause</span></button>
+            <div class="ml-range-wrap" data-draw="log-step" data-source="logit_gd"></div>
+          </div>
+        </div>
+        <dl class="ml-stats">
+          <div class="ml-stat"><dt>Iteration</dt><dd data-draw="log-iter" data-source="logit_gd" data-field="iter">—</dd></div>
+          <div class="ml-stat"><dt>Log-loss</dt><dd data-draw="log-loss-v" data-source="logit_gd" data-field="logloss">—</dd></div>
+          <div class="ml-stat"><dt>Accuracy</dt><dd data-draw="log-acc" data-source="logit_gd" data-field="acc">—</dd></div>
+          <div class="ml-stat"><dt>Weight w</dt><dd data-draw="log-w" data-source="logit_gd" data-field="w">—</dd></div>
+        </dl>
+      </div>
+      <div class="ml-main">
+        <ul class="ml-legend"><li class="ml-key k-c0">Class 0</li><li class="ml-key k-c1">Class 1</li><li class="ml-key ml-line k-hi">Probability p</li><li class="ml-key ml-dash k-fg">p = ½ boundary</li></ul>
+        <div class="ml-chart ml-square" data-draw="log-chart" data-source="logit_points logit_gd"></div>
+        <h4 class="ml-section-title">Log-loss by iteration</h4>
+        <div class="ml-chart" data-draw="log-loss" data-source="logit_gd"></div>
+      </div>
+    </section>
+
+    <!-- 3. Decision tree -->
+    <section class="ml-panel" id="tree" data-tab="tree" data-fam="tree" role="tabpanel" hidden>
+      <div class="ml-side">
+        <p class="ml-eyebrow">Tree models · classification</p>
+        <h3 class="ml-name">Decision tree</h3>
+        <p class="ml-formula"><i>G</i> = 1 − <span>Σ</span><sub><i>k</i></sub> <i>p</i><sub><i>k</i></sub><sup>2</sup></p>
+        <p class="ml-text">Cut the plane with one vertical or horizontal line at a time, always choosing the cut that leaves the two sides purest, measured by Gini impurity <i>G</i>. A 50/50 mix scores one half; a pure box scores zero.</p>
+        <div class="ml-control">
+          <span class="ml-control-label">Maximum depth</span>
+          <div class="ml-control-row">
+            <button class="ml-play" data-play="tree" aria-pressed="false"><span class="ml-play-on">▶ Grow</span><span class="ml-play-off">❚❚ Pause</span></button>
+            <div class="ml-chips" data-draw="tree-param" data-source="model_metrics"></div>
+          </div>
+        </div>
+        <dl class="ml-stats">
+          <div class="ml-stat"><dt>Gini at the root</dt><dd data-draw="tree-gini" data-source="tree_splits" data-field="gini">—</dd></div>
+          <div class="ml-stat"><dt>Training accuracy</dt><dd data-draw="tree-train" data-source="model_metrics" data-field="train_acc">—</dd></div>
+          <div class="ml-stat"><dt>Test accuracy</dt><dd data-draw="tree-test" data-source="model_metrics" data-field="test_acc">—</dd></div>
+        </dl>
+      </div>
+      <div class="ml-main">
+        <ul class="ml-legend"><li class="ml-key k-c0">Class 0</li><li class="ml-key k-c1">Class 1</li><li class="ml-key ml-line k-hi">Splits</li></ul>
+        <div class="ml-chart ml-square" data-draw="tree-chart" data-source="surfaces moons grid tree_splits"></div>
+        <h4 class="ml-section-title">Every split in this tree</h4>
+        <p class="ml-note">Gini and sample count are measured at the node before it is split.</p>
+        <div class="ml-table-wrap">
+          <table class="ml-table" data-source="tree_splits" data-row-key="max_depth,node">
+            <thead><tr>
+              <th data-field="node">Node</th>
+              <th data-field="node_depth" class="ml-num">Depth</th>
+              <th data-field="feature">Feature</th>
+              <th data-field="threshold" class="ml-num">Threshold</th>
+              <th data-field="gini" class="ml-num">Gini</th>
+              <th data-field="samples" class="ml-num">Samples</th>
+            </tr></thead>
+            <tbody data-draw="tree-rows"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. Random forest -->
+    <section class="ml-panel" id="forest" data-tab="forest" data-fam="tree" role="tabpanel" hidden>
+      <div class="ml-side">
+        <p class="ml-eyebrow">Tree models · classification</p>
+        <h3 class="ml-name">Random forest</h3>
+        <p class="ml-formula"><i>ŷ</i> = mode(<i>h</i><sub>1</sub>(<i>x</i>), …, <i>h</i><sub><i>T</i></sub>(<i>x</i>))</p>
+        <p class="ml-text">Grow many trees, each on a bootstrap resample with random features at each split, then let them vote. Single trees are jagged and disagree; their majority is smoother and steadier.</p>
+        <div class="ml-control">
+          <span class="ml-control-label">Number of trees T</span>
+          <div class="ml-control-row">
+            <button class="ml-play" data-play="forest" aria-pressed="false"><span class="ml-play-on">▶ Play</span><span class="ml-play-off">❚❚ Pause</span></button>
+            <div class="ml-chips" data-draw="forest-param" data-source="model_metrics"></div>
+          </div>
+        </div>
+        <dl class="ml-stats">
+          <div class="ml-stat"><dt>Training accuracy</dt><dd data-draw="forest-train" data-source="model_metrics" data-field="train_acc">—</dd></div>
+          <div class="ml-stat"><dt>Test accuracy</dt><dd data-draw="forest-test" data-source="model_metrics" data-field="test_acc">—</dd></div>
+        </dl>
+        <h4 class="ml-section-title">Nine individual trees</h4>
+        <div class="ml-members" data-draw="forest-members" data-source="forest_members grid"></div>
+      </div>
+      <div class="ml-main">
+        <ul class="ml-legend"><li class="ml-key k-c0">Class 0</li><li class="ml-key k-c1">Class 1</li><li class="ml-key ml-dash k-fg">Vote split 50/50</li></ul>
+        <div class="ml-chart ml-square" data-draw="forest-chart" data-source="surfaces moons grid"></div>
+      </div>
+    </section>
+
+    <!-- 5. Gradient boosting -->
+    <section class="ml-panel" id="boosting" data-tab="boosting" data-fam="tree" role="tabpanel" hidden>
+      <div class="ml-side">
+        <p class="ml-eyebrow">Tree models · classification</p>
+        <h3 class="ml-name">Gradient boosting</h3>
+        <p class="ml-formula"><i>F</i><sub><i>m</i></sub>(<i>x</i>) = <i>F</i><sub><i>m</i>−1</sub>(<i>x</i>) + <i>η</i> <i>h</i><sub><i>m</i></sub>(<i>x</i>)</p>
+        <p class="ml-text">Add small trees one after another. Each new tree <i>h<sub>m</sub></i> is fitted to what the model so far still gets wrong, and is added with a shrinkage factor <i>η</i>. Ringed points are the current mistakes.</p>
+        <div class="ml-control">
+          <span class="ml-control-label">Trees added so far</span>
+          <div class="ml-control-row">
+            <button class="ml-play" data-play="boosting" aria-pressed="false"><span class="ml-play-on">▶ Play</span><span class="ml-play-off">❚❚ Pause</span></button>
+            <div class="ml-chips" data-draw="boost-param" data-source="model_metrics"></div>
+          </div>
+        </div>
+        <dl class="ml-stats">
+          <div class="ml-stat"><dt>Trees</dt><dd data-draw="boost-trees" data-source="model_metrics" data-field="param">—</dd></div>
+          <div class="ml-stat"><dt>Training mistakes</dt><dd data-draw="boost-mistakes" data-source="model_metrics" data-field="train_mistakes">—</dd></div>
+          <div class="ml-stat"><dt>Test accuracy</dt><dd data-draw="boost-test" data-source="model_metrics" data-field="test_acc">—</dd></div>
+        </dl>
+      </div>
+      <div class="ml-main">
+        <ul class="ml-legend"><li class="ml-key k-c0">Class 0</li><li class="ml-key k-c1">Class 1</li><li class="ml-key ml-ring k-hi">Misclassified</li></ul>
+        <div class="ml-chart ml-square" data-draw="boost-chart" data-source="surfaces moons grid boost_mistakes"></div>
+        <h4 class="ml-section-title">Training mistakes vanish; test accuracy does not keep rising</h4>
+        <ul class="ml-legend"><li class="ml-key ml-line k-tree">Training accuracy</li><li class="ml-key ml-dash k-fg">Test accuracy</li></ul>
+        <div class="ml-chart" data-draw="boost-curve" data-source="model_metrics"></div>
+      </div>
+    </section>
+
+    <!-- 6. KNN -->
+    <section class="ml-panel" id="knn" data-tab="knn" data-fam="dist" role="tabpanel" hidden>
+      <div class="ml-side">
+        <p class="ml-eyebrow">Distance-based · classification</p>
+        <h3 class="ml-name">K-nearest neighbours</h3>
+        <p class="ml-formula"><i>ŷ</i> = mode{ <i>y</i><sub><i>i</i></sub> : <i>i</i> ∈ <i>N</i><sub><i>k</i></sub>(<i>x</i>) }</p>
+        <p class="ml-text">No training at all: to classify a point, find the <i>k</i> closest training points and take their majority label. Click anywhere on the chart to move the query point.</p>
+        <div class="ml-control">
+          <span class="ml-control-label">Neighbours k</span>
+          <div class="ml-chips" data-draw="knn-param" data-source="model_metrics"></div>
+        </div>
+        <p class="ml-text">Vote at the query point: <b data-draw="knn-vote" data-source="moons">—</b></p>
+        <dl class="ml-stats">
+          <div class="ml-stat"><dt>Training accuracy</dt><dd data-draw="knn-train" data-source="model_metrics" data-field="train_acc">—</dd></div>
+          <div class="ml-stat"><dt>Test accuracy</dt><dd data-draw="knn-test" data-source="model_metrics" data-field="test_acc">—</dd></div>
+        </dl>
+      </div>
+      <div class="ml-main">
+        <ul class="ml-legend"><li class="ml-key k-c0">Class 0</li><li class="ml-key k-c1">Class 1</li><li class="ml-key ml-ring k-hi">Query and its neighbours</li></ul>
+        <div class="ml-chart ml-square" data-draw="knn-chart" data-source="surfaces moons grid"></div>
+      </div>
+    </section>
+
+    <!-- 7. k-means -->
+    <section class="ml-panel" id="kmeans" data-tab="kmeans" data-fam="dist" role="tabpanel" hidden>
+      <div class="ml-side">
+        <p class="ml-eyebrow">Distance-based · clustering</p>
+        <h3 class="ml-name">K-means</h3>
+        <p class="ml-formula"><i>μ</i><sub><i>j</i></sub> = <span>1</span>⁄<span>|<i>C</i><sub><i>j</i></sub>|</span> Σ<sub><i>i</i>∈<i>C</i><sub><i>j</i></sub></sub> <i>x</i><sub><i>i</i></sub></p>
+        <p class="ml-text">No labels. Drop <i>k</i> centres, assign every point to its nearest centre, move each centre <i>μ<sub>j</sub></i> to the mean of its points, and repeat until nothing moves. The faint paths trace each centre.</p>
+        <div class="ml-control">
+          <span class="ml-control-label">Clusters k</span>
+          <div class="ml-chips" data-draw="km-param" data-source="kmeans_elbow"></div>
+        </div>
+        <div class="ml-control">
+          <span class="ml-control-label">Iteration</span>
+          <div class="ml-control-row">
+            <button class="ml-play" data-play="kmeans" aria-pressed="false"><span class="ml-play-on">▶ Play</span><span class="ml-play-off">❚❚ Pause</span></button>
+            <div class="ml-range-wrap" data-draw="km-step" data-source="kmeans_steps"></div>
+          </div>
+        </div>
+        <dl class="ml-stats">
+          <div class="ml-stat"><dt>Iteration</dt><dd data-draw="km-iter" data-source="kmeans_steps" data-field="iter">—</dd></div>
+          <div class="ml-stat"><dt>Final inertia</dt><dd data-draw="km-inertia" data-source="kmeans_elbow" data-field="inertia">—</dd></div>
+          <div class="ml-stat"><dt>Match to true groups (ARI)</dt><dd data-draw="km-ari" data-source="kmeans_elbow" data-field="ari">—</dd></div>
+        </dl>
+      </div>
+      <div class="ml-main">
+        <div class="ml-chart ml-square" data-draw="km-chart" data-source="blobs kmeans_steps kmeans_assign"></div>
+        <h4 class="ml-section-title">Elbow: inertia by number of clusters</h4>
+        <p class="ml-note">Inertia is the total squared distance from points to their centre. The bend shows where extra clusters stop paying off.</p>
+        <div class="ml-chart" data-draw="km-elbow" data-source="kmeans_elbow"></div>
+      </div>
+    </section>
+
+    <!-- 8. Neural network -->
+    <section class="ml-panel" id="nn" data-tab="nn" data-fam="nn" role="tabpanel" hidden>
+      <div class="ml-side">
+        <p class="ml-eyebrow">Neural networks · classification</p>
+        <h3 class="ml-name">Neural network</h3>
+        <p class="ml-formula"><i>a</i> = <i>σ</i>(<i>W</i><i>x</i> + <i>b</i>)</p>
+        <p class="ml-text">Stack layers of the same linear-then-squash step. Each layer's activations <i>a</i> feed the next, so the network can bend its boundary around the moons. Backpropagation adjusts every weight in <i>W</i> each epoch.</p>
+        <div class="ml-control">
+          <span class="ml-control-label">Training epoch</span>
+          <div class="ml-control-row">
+            <button class="ml-play" data-play="nn" aria-pressed="false"><span class="ml-play-on">▶ Train</span><span class="ml-play-off">❚❚ Pause</span></button>
+            <div class="ml-chips" data-draw="nn-param" data-source="nn_training"></div>
+          </div>
+        </div>
+        <dl class="ml-stats">
+          <div class="ml-stat"><dt>Loss</dt><dd data-draw="nn-loss-v" data-source="nn_training" data-field="loss">—</dd></div>
+          <div class="ml-stat"><dt>Training accuracy</dt><dd data-draw="nn-train" data-source="nn_training" data-field="train_acc">—</dd></div>
+          <div class="ml-stat"><dt>Test accuracy</dt><dd data-draw="nn-test" data-source="nn_training" data-field="test_acc">—</dd></div>
+        </dl>
+        <h4 class="ml-section-title">Trained weights</h4>
+        <p class="ml-note">Line width is the weight's size; red is positive, blue negative.</p>
+        <div class="ml-chart" data-draw="nn-arch" data-source="nn_weights"></div>
+      </div>
+      <div class="ml-main">
+        <ul class="ml-legend"><li class="ml-key k-c0">Class 0</li><li class="ml-key k-c1">Class 1</li><li class="ml-key ml-dash k-fg">p = ½ boundary</li></ul>
+        <div class="ml-chart ml-square" data-draw="nn-chart" data-source="surfaces moons grid"></div>
+        <h4 class="ml-section-title">Loss by epoch</h4>
+        <div class="ml-chart" data-draw="nn-loss" data-source="nn_training"></div>
+      </div>
+    </section>
+  </section>
+
+  <details class="ml-details">
+    <summary>How the sample data was made</summary>
+    <dl>
+      <dt>Regression line</dt><dd>Sixty points along a straight line with Gaussian noise. Gradient descent starts from a deliberately poor line, like the video's opening frame.</dd>
+      <dt>Logistic</dt><dd>Sixty points on one axis; the chance of class 1 follows a sigmoid centred mid-range.</dd>
+      <dt>Two moons</dt><dd>Scikit-learn's interleaving half-moons with noise, split into training and held-out test points. Shared by the tree, forest, boosting, KNN, neural-network and logistic comparison.</dd>
+      <dt>Blobs</dt><dd>Three Gaussian clusters for k-means. Their true groups are used only to score the result.</dd>
+      <dt>Shading</dt><dd>Colour shows the predicted class; stronger shading means a more confident model.</dd>
+      <dt>Reproduce</dt><dd>Everything comes from one seeded Python script in the companion Jupyter Book.</dd>
+    </dl>
+  </details>
+</div>
+
+<script>
+(function () {
+  const M = (window.ML8 = window.ML8 || {});
+  M.state = { linear: null, logistic: null, tree: 3, forest: 10, boosting: 8, knn: 5, kmK: 3, kmIter: null, nn: 400, q: [0.45, 0.3] };
+  M.fmt = { pct: d3.format('.1%'), f2: d3.format('.2f'), f3: d3.format('.3f'), f4: d3.format('.4f'), int: d3.format(','), f1: d3.format(',.1f') };
+  M.color = { c0: 'var(--ml-c0)', c1: 'var(--ml-c1)', hi: 'var(--ml-hi)', fg: 'var(--color-fg)', muted: 'var(--color-fg-muted)' };
+  M.famColor = { 'Linear models': 'var(--ml-f-lin)', 'Tree models': 'var(--ml-f-tree)', 'Distance-based': 'var(--ml-f-dist)', 'Neural networks': 'var(--ml-f-nn)' };
+
+  const cache = new WeakMap();
+  M.rows = function (id) {
+    const d = dash.data(id);
+    if (!d || d.status !== 'ok' || !Array.isArray(d.data)) return null;
+    if (cache.has(d.data)) return cache.get(d.data);
+    const out = d.data.map((r) => {
+      const o = {};
+      for (const k in r) {
+        const v = r[k];
+        const n = typeof v === 'number' ? v : Number(v);
+        o[k] = v !== '' && v !== null && v !== undefined && !Number.isNaN(n) ? n : v;
+      }
+      return o;
+    });
+    cache.set(d.data, out);
+    return out;
+  };
+
+  // Chart readiness: returns the parsed rows of each id, or null after drawing the right state.
+  M.ready = function (el, ids) {
+    const sts = ids.map((id) => dash.data(id).status);
+    if (sts.some((s) => s === 'error' || s === 'declined' || s === 'missing')) {
+      el.classList.remove('dash-skeleton');
+      const f = document.createElement('div');
+      f.className = 'ml-failed';
+      f.textContent = 'Failed to load';
+      el.replaceChildren(f);
+      return null;
+    }
+    const rs = ids.map(M.rows);
+    if (rs.some((r) => !r)) { el.replaceChildren(); el.classList.add('dash-skeleton'); return null; }
+    el.classList.remove('dash-skeleton');
+    return rs;
+  };
+
+  M.where = (obj) => Object.entries(obj).map(([k, v]) => encodeURIComponent(k) + '=' + encodeURIComponent(v)).join('&');
+  M.match = (rows, obj) => rows.find((r) => Object.entries(obj).every(([k, v]) => String(r[k]) === String(v)));
+
+  // A single number: set its data-where and text, or put the dash back.
+  M.value = function (el, id, where, field, fmt) {
+    const rows = M.rows(id);
+    const row = rows && where ? M.match(rows, where) : null;
+    if (!row) { el.textContent = '—'; return null; }
+    el.setAttribute('data-where', M.where(where));
+    el.textContent = fmt ? fmt(row[field]) : String(row[field]);
+    return row;
+  };
+
+  M.redraw = (names) => names.forEach((n) => dash.draw(n));
+
+  M.params = (model) => {
+    const rows = M.rows('model_metrics');
+    return rows ? rows.filter((r) => r.model === model).map((r) => r.param) : [];
+  };
+
+  // Buttons for a list of values.
+  M.chips = function (el, values, current, label, onPick) {
+    el.replaceChildren(...values.map((v) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'ml-chip';
+      b.textContent = label ? label(v) : String(v);
+      b.setAttribute('aria-pressed', String(v === current));
+      b.addEventListener('click', () => onPick(v));
+      return b;
+    }));
+  };
+
+  // A range input over 0..n-1.
+  M.range = function (el, id, n, value, aria, onInput) {
+    let input = el.querySelector('input');
+    if (!input) {
+      input = document.createElement('input');
+      input.type = 'range';
+      input.className = 'ml-range';
+      input.id = id;
+      input.setAttribute('aria-label', aria);
+      el.replaceChildren(input);
+    }
+    input.min = 0; input.max = Math.max(0, n - 1); input.step = 1; input.value = value;
+    input.oninput = () => onInput(+input.value);
+  };
+
+  // SVG sized to the element's width.
+  M.svg = function (el, W, H) {
+    const svg = d3.create('svg').attr('width', '100%').attr('viewBox', `0 0 ${W} ${H}`).attr('role', 'img');
+    el.replaceChildren(svg.node());
+    return svg;
+  };
+
+  // Tooltip inside a chart element.
+  M.tip = function (el) {
+    let t = el.querySelector('.ml-tip');
+    if (!t) { t = document.createElement('div'); t.className = 'ml-tip'; t.hidden = true; el.appendChild(t); }
+    return {
+      show(event, lines) {
+        t.replaceChildren(...lines.map(([k, v], i) => {
+          const line = document.createElement('div');
+          if (k) { const s = document.createElement('span'); s.className = 'ml-tip-k'; s.textContent = k + (v !== undefined ? ' ' : ''); line.appendChild(s); }
+          if (v !== undefined) line.appendChild(document.createTextNode(v));
+          return line;
+        }));
+        t.hidden = false;
+        const box = el.getBoundingClientRect();
+        let x = event.clientX - box.left + 12, y = event.clientY - box.top + 12;
+        const tw = t.offsetWidth, th = t.offsetHeight;
+        if (x + tw > box.width) x = Math.max(0, event.clientX - box.left - tw - 12);
+        if (y + th > box.height) y = Math.max(0, event.clientY - box.top - th - 12);
+        t.style.left = x + 'px'; t.style.top = y + 'px';
+      },
+      hide() { t.hidden = true; },
+    };
+  };
+
+  // Probabilities of one (model, param) on the grid, as an array indexed j*n+i.
+  const surfCache = new WeakMap();
+  M.surface = function (model, param) {
+    const rows = M.rows('surfaces');
+    const g = M.rows('grid');
+    if (!rows || !g) return null;
+    let byKey = surfCache.get(rows);
+    if (!byKey) {
+      byKey = new Map();
+      const n = g[0].n;
+      for (const r of rows) {
+        const k = r.model + '|' + r.param;
+        let a = byKey.get(k);
+        if (!a) { a = new Float32Array(n * n); byKey.set(k, a); }
+        a[r.j * n + r.i] = r.p1;
+      }
+      surfCache.set(rows, byKey);
+    }
+    return byKey.get(model + '|' + param) || null;
+  };
+
+  // Contour of p = 0.5 drawn as an SVG path, without d3-geo.
+  M.contourPath = function (probs, n, sx, sy) {
+    const c = d3.contours().size([n, n]).thresholds([0.5])(Array.from(probs))[0];
+    if (!c) return '';
+    let d = '';
+    for (const poly of c.coordinates) for (const ring of poly) {
+      ring.forEach(([px, py], k) => { d += (k ? 'L' : 'M') + sx(px - 0.5).toFixed(1) + ',' + sy(py - 0.5).toFixed(1); });
+      d += 'Z';
+    }
+    return d;
+  };
+
+  // Decision surface + points, shared by tree, forest, boosting, KNN and the network.
+  M.surfaceChart = function (el, opts) {
+    const g = M.rows('grid')[0];
+    const W = Math.max(260, Math.round(el.clientWidth || 480));
+    const spanX = g.x1_max - g.x1_min, spanY = g.x2_max - g.x2_min;
+    const H = Math.round(W * spanY / spanX);
+    const x = d3.scaleLinear([g.x1_min, g.x1_max], [0, W]);
+    const y = d3.scaleLinear([g.x2_min, g.x2_max], [H, 0]);
+    const svg = M.svg(el, W, H);
+    svg.attr('aria-label', opts.label || 'Decision surface');
+    const n = g.n, dx = spanX / (n - 1), dy = spanY / (n - 1);
+    const ex = (i) => Math.round(x(g.x1_min + (i - 0.5) * dx)), ey = (j) => Math.round(y(g.x2_min + (j - 0.5) * dy));
+    const probs = opts.probs;
+    if (probs) {
+      const cells = svg.append('g').attr('shape-rendering', 'crispEdges');
+      for (let idx = 0; idx < n * n; idx++) {
+        const i = idx % n, j = Math.floor(idx / n), p = probs[idx];
+        cells.append('rect')
+          .attr('x', ex(i)).attr('y', ey(j + 1))
+          .attr('width', ex(i + 1) - ex(i)).attr('height', ey(j) - ey(j + 1))
+          .style('fill', p >= 0.5 ? M.color.c1 : M.color.c0)
+          .attr('fill-opacity', (0.06 + 0.4 * Math.abs(p - 0.5) * 2).toFixed(3));
+      }
+      const sx = (u) => x(g.x1_min + u * dx), sy = (v) => y(g.x2_min + v * dy);
+      svg.append('path').attr('d', M.contourPath(probs, n, sx, sy)).style('fill', 'none')
+        .style('stroke', M.color.fg).attr('stroke-opacity', 0.55).attr('stroke-width', 1.2).attr('stroke-dasharray', '4 3');
+    }
+    if (opts.points) {
+      svg.append('g').selectAll('circle').data(opts.points).join('circle')
+        .attr('cx', (d) => x(d.x1)).attr('cy', (d) => y(d.x2)).attr('r', 3.3)
+        .style('fill', (d) => (d.label === 1 ? M.color.c1 : M.color.c0))
+        .style('stroke', 'var(--color-panel)').attr('stroke-width', 0.8);
+    }
+    const tip = M.tip(el);
+    svg.on('pointermove', (event) => {
+      const [mx, my] = d3.pointer(event, svg.node());
+      const vx = x.invert(mx), vy = y.invert(my);
+      const lines = [['x₁', M.fmt.f2(vx)], ['x₂', M.fmt.f2(vy)]];
+      if (probs) {
+        const i = Math.max(0, Math.min(n - 1, Math.round((vx - g.x1_min) / dx)));
+        const j = Math.max(0, Math.min(n - 1, Math.round((vy - g.x2_min) / dy)));
+        lines.push(['P(class 1)', M.fmt.f2(probs[j * n + i])]);
+      }
+      tip.show(event, lines);
+    }).on('pointerleave', () => tip.hide());
+    return { svg, x, y, W, H, g };
+  };
+
+  M.trainPoints = () => (M.rows('moons') || []).filter((r) => r.split === 'train');
+
+  // Line chart with axes; series: [{values:[{x,y}], color, dash, name}]
+  M.lineChart = function (el, opts) {
+    const W = Math.max(260, Math.round(el.clientWidth || 480));
+    const H = opts.height || 190;
+    const svg = M.svg(el, W, H);
+    svg.attr('aria-label', opts.label || 'Line chart');
+    const all = opts.series.flatMap((s) => s.values);
+    const yDom = opts.yDomain || [Math.min(0, d3.min(all, (d) => d.y)), d3.max(all, (d) => d.y) * 1.05];
+    const yTmp = d3.scaleLinear(yDom, [H - 28, 8]).nice();
+    const yTicks = yTmp.ticks(4);
+    const yFmt = opts.yFmt || d3.format('~s');
+    const probe = svg.append('text').attr('font-size', 11);
+    let mw = 0;
+    for (const t of yTicks) { probe.text(yFmt(t)); mw = Math.max(mw, probe.node().getComputedTextLength()); }
+    probe.remove();
+    const m = { l: Math.ceil(mw) + 10, r: 14, t: 8, b: 28 };
+    const xType = opts.xType === 'symlog' ? d3.scaleSymlog : d3.scaleLinear;
+    const x = xType(opts.xDomain || d3.extent(all, (d) => d.x), [m.l, W - m.r]);
+    const y = d3.scaleLinear(yDom, [H - m.b, m.t]).nice();
+    svg.append('g').selectAll('line').data(y.ticks(4)).join('line').attr('class', 'ml-gridline')
+      .attr('x1', m.l).attr('x2', W - m.r).attr('y1', (d) => y(d)).attr('y2', (d) => y(d));
+    const xTicks = opts.xTicks || x.ticks(Math.max(2, Math.floor(W / 90)));
+    svg.append('g').attr('transform', `translate(0,${H - m.b})`)
+      .call(d3.axisBottom(x).tickValues(xTicks).tickFormat(opts.xFmt || d3.format('~s')).tickSizeOuter(0))
+      .attr('font-size', null).attr('font-family', null);
+    svg.append('g').attr('transform', `translate(${m.l},0)`)
+      .call(d3.axisLeft(y).ticks(4).tickFormat(yFmt).tickSize(0)).attr('font-size', null).attr('font-family', null)
+      .call((gg) => gg.select('.domain').remove());
+    for (const s of opts.series) {
+      svg.append('path').datum(s.values)
+        .attr('d', d3.line().x((d) => x(d.x)).y((d) => y(d.y)))
+        .style('fill', 'none').style('stroke', s.color).attr('stroke-width', 2)
+        .attr('stroke-linecap', 'round').attr('stroke-linejoin', 'round')
+        .attr('stroke-dasharray', s.dash ? '5 4' : null);
+      if (s.dots) svg.append('g').selectAll('circle').data(s.values).join('circle')
+        .attr('cx', (d) => x(d.x)).attr('cy', (d) => y(d.y)).attr('r', 3).style('fill', s.color);
+    }
+    if (opts.marker) {
+      const mk = opts.marker;
+      svg.append('line').attr('x1', x(mk.x)).attr('x2', x(mk.x)).attr('y1', m.t).attr('y2', H - m.b)
+        .style('stroke', 'var(--cds-chart-reference)').attr('stroke-dasharray', '3 3');
+      for (const s of opts.series) {
+        const v = s.values.find((d) => d.x === mk.x);
+        if (v) svg.append('circle').attr('cx', x(v.x)).attr('cy', y(v.y)).attr('r', 4.5)
+          .style('fill', s.color).style('stroke', 'var(--color-panel)').attr('stroke-width', 1.5);
+      }
+    }
+    if (opts.xLabel) svg.append('text').attr('x', W - m.r).attr('y', H - 2).attr('text-anchor', 'end').text(opts.xLabel);
+    const tip = M.tip(el);
+    const xs = Array.from(new Set(all.map((d) => d.x))).sort((a, b) => a - b);
+    svg.on('pointermove', (event) => {
+      const [mx] = d3.pointer(event, svg.node());
+      const xv = x.invert(mx);
+      const near = xs.reduce((a, b) => (Math.abs(b - xv) < Math.abs(a - xv) ? b : a), xs[0]);
+      const lines = [[(opts.xName || 'x') + ' ' + (opts.xFmtTip || opts.xFmt || String)(near)]];
+      for (const s of opts.series) {
+        const v = s.values.find((d) => d.x === near);
+        if (v) lines.push([s.name, (opts.yFmtTip || yFmt)(v.y)]);
+      }
+      tip.show(event, lines);
+    }).on('pointerleave', () => tip.hide());
+    return { svg, x, y, W, H };
+  };
+
+  // Play buttons: each player steps through a list of values.
+  M.players = {};
+  M.timers = {};
+})();
+</script>
+
+<script>
+// Overview: takeaway, accuracy dot plot, scorecard table
+(function () {
+  const M = window.ML8;
+  const classRows = () => (M.rows('scorecard') || []).filter((r) => r.task === 'Classification');
+  const best = () => { const r = classRows(); return r.length ? r.reduce((a, b) => (b.value > a.value ? b : a)) : null; };
+  const worst = () => { const r = classRows(); return r.length ? r.reduce((a, b) => (b.value < a.value ? b : a)) : null; };
+  const named = (pick, field, fmt) => (el) => {
+    const r = pick();
+    if (!r) { el.textContent = '—'; return; }
+    M.value(el, 'scorecard', { key: r.key }, field, fmt);
+  };
+  dash.draw('best-name', named(best, 'algorithm', (v) => String(v).toLowerCase()));
+  dash.draw('best-acc', named(best, 'value', M.fmt.pct));
+  dash.draw('worst-name', named(worst, 'algorithm', (v) => String(v).toLowerCase()));
+  dash.draw('worst-acc', named(worst, 'value', M.fmt.pct));
+
+  dash.draw('acc-dots', (el) => {
+    const rs = M.ready(el, ['scorecard']);
+    if (!rs) return;
+    const rows = rs[0].filter((r) => r.task === 'Classification').sort((a, b) => b.value - a.value);
+    const W = Math.max(260, Math.round(el.clientWidth || 480));
+    const rowH = 30, H = rows.length * rowH + 30;
+    const svg = M.svg(el, W, H).attr('aria-label', 'Test accuracy by algorithm');
+    const probe = svg.append('text').attr('font-size', 12);
+    let lw = 0;
+    for (const r of rows) { probe.text(r.algorithm); lw = Math.max(lw, probe.node().getComputedTextLength()); }
+    probe.text('100.0%'); const vw = probe.node().getComputedTextLength(); probe.remove();
+    const m = { l: Math.ceil(lw) + 12, r: Math.ceil(vw) + 12, t: 6, b: 24 };
+    const lo = Math.floor((d3.min(rows, (r) => r.value) - 0.03) * 20) / 20;
+    const x = d3.scaleLinear([lo, 1], [m.l, W - m.r]);
+    const y = d3.scaleBand(rows.map((r) => r.key), [m.t, H - m.b]).padding(0.3);
+    svg.append('g').selectAll('line').data(x.ticks(4)).join('line').attr('class', 'ml-gridline')
+      .attr('x1', (d) => x(d)).attr('x2', (d) => x(d)).attr('y1', m.t).attr('y2', H - m.b);
+    svg.append('g').attr('transform', `translate(0,${H - m.b})`).call(d3.axisBottom(x).ticks(4).tickFormat(d3.format('.0%')).tickSizeOuter(0))
+      .attr('font-size', null).attr('font-family', null);
+    const g = svg.append('g').selectAll('g').data(rows).join('g').attr('transform', (r) => `translate(0,${y(r.key) + y.bandwidth() / 2})`);
+    g.append('line').attr('x1', x(lo)).attr('x2', (r) => x(r.value)).style('stroke', (r) => M.famColor[r.family] || M.color.muted).attr('stroke-width', 2).attr('stroke-opacity', 0.45);
+    g.append('circle').attr('cx', (r) => x(r.value)).attr('r', 6).style('fill', (r) => M.famColor[r.family] || M.color.muted);
+    g.append('text').attr('x', m.l - 8).attr('dy', '0.35em').attr('text-anchor', 'end').style('fill', 'var(--color-fg)').attr('font-size', 12).text((r) => r.algorithm);
+    g.append('text').attr('x', (r) => x(r.value) + 10).attr('dy', '0.35em').attr('font-size', 12).style('fill', 'var(--color-fg)').text((r) => M.fmt.pct(r.value));
+    const tip = M.tip(el);
+    g.on('pointermove', (event, r) => tip.show(event, [[r.algorithm], [r.metric, M.fmt.pct(r.value)]])).on('pointerleave', () => tip.hide());
+  });
+
+  dash.draw('score-rows', (tb) => {
+    const rows = M.rows('scorecard');
+    if (!rows) { tb.replaceChildren(); return; }
+    tb.replaceChildren(...rows.map((r) => {
+      const tr = document.createElement('tr');
+      tr.setAttribute('data-key', r.key);
+      const cells = [r.algorithm, r.family, r.metric, r.key === 'linear' || r.key === 'kmeans' ? M.fmt.f3(r.value) : M.fmt.pct(r.value)];
+      cells.forEach((c, i) => {
+        const td = document.createElement('td');
+        if (i === 1) { const s = document.createElement('span'); s.className = 'ml-fam'; s.style.setProperty('--fam', M.famColor[r.family] || ''); s.textContent = c; td.appendChild(s); }
+        else td.textContent = c;
+        if (i === 3) td.className = 'ml-num';
+        tr.appendChild(td);
+      });
+      return tr;
+    }));
+  });
+})();
+</script>
+
+<script>
+// Tabs and play buttons
+(function () {
+  const M = window.ML8;
+  const open = (name, link) => {
+    document.querySelectorAll('.ml8 .ml-panel').forEach((p) => { p.hidden = p.getAttribute('data-tab') !== name; });
+    document.querySelectorAll('.ml8 .ml-tab').forEach((t) => t.setAttribute('aria-selected', String(t.getAttribute('data-tab') === name)));
+    Object.keys(M.timers).forEach(stop);
+    if (link) dash.setLink(name);
+  };
+  document.querySelectorAll('.ml8 .ml-tab').forEach((t) => t.addEventListener('click', () => open(t.getAttribute('data-tab'), true)));
+  const hash = location.hash.slice(1);
+  if (hash && document.querySelector(`.ml8 .ml-panel[data-tab="${CSS.escape(hash)}"]`)) open(hash, false);
+
+  function stop(key) {
+    clearInterval(M.timers[key]);
+    delete M.timers[key];
+    document.querySelectorAll(`.ml8 .ml-play[data-play="${key}"]`).forEach((b) => b.setAttribute('aria-pressed', 'false'));
+  }
+  document.querySelectorAll('.ml8 .ml-play').forEach((b) => b.addEventListener('click', () => {
+    const key = b.getAttribute('data-play');
+    const p = M.players[key];
+    if (!p) return;
+    if (M.timers[key]) { stop(key); return; }
+    const vals = p.values();
+    if (!vals.length) return;
+    if (vals.indexOf(p.get()) >= vals.length - 1 || vals.indexOf(p.get()) < 0) p.set(vals[0]);
+    b.setAttribute('aria-pressed', 'true');
+    const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    M.timers[key] = setInterval(() => {
+      const v = p.values();
+      const i = v.indexOf(p.get());
+      if (i < 0 || i >= v.length - 1) { stop(key); return; }
+      p.set(v[i + 1]);
+    }, reduce ? 1400 : (p.interval || 650));
+  }));
+})();
+</script>
+
+<script>
+// 1. Linear regression and 2. Logistic regression
+(function () {
+  const M = window.ML8, S = M.state;
+  // ---- linear
+  const LIN = ['lin-step', 'lin-chart', 'lin-loss', 'lin-iter', 'lin-w', 'lin-b', 'lin-mse'];
+  const linIdx = (n) => (S.linear === null || S.linear >= n ? n - 1 : S.linear);
+  M.players.linear = {
+    values: () => d3.range((M.rows('reg_gd') || []).length),
+    get: () => linIdx((M.rows('reg_gd') || []).length),
+    set: (v) => { S.linear = v; M.redraw(LIN); },
+  };
+  const linRow = () => { const r = M.rows('reg_gd'); return r ? r[linIdx(r.length)] : null; };
+  dash.draw('lin-step', (el) => {
+    const r = M.rows('reg_gd');
+    if (!r) { el.replaceChildren(); return; }
+    M.range(el, 'ml-lin-step', r.length, linIdx(r.length), 'Gradient-descent step', (v) => { S.linear = v; M.redraw(LIN); });
+  });
+  const linVal = (field, fmt) => (el) => { const row = linRow(); if (!row) { el.textContent = '—'; return; } M.value(el, 'reg_gd', { iter: row.iter }, field, fmt); };
+  dash.draw('lin-iter', linVal('iter', M.fmt.int));
+  dash.draw('lin-w', linVal('w', M.fmt.f3));
+  dash.draw('lin-b', linVal('b', M.fmt.f3));
+  dash.draw('lin-mse', linVal('mse', M.fmt.f2));
+
+  dash.draw('lin-chart', (el) => {
+    const rs = M.ready(el, ['reg_points', 'reg_gd']);
+    if (!rs) return;
+    const [pts, gd] = rs;
+    const row = gd[linIdx(gd.length)];
+    const W = Math.max(260, Math.round(el.clientWidth || 480)), H = Math.round(Math.min(W * 0.62, 380));
+    const m = { l: 34, r: 12, t: 10, b: 28 };
+    const x = d3.scaleLinear([0, 10], [m.l, W - m.r]);
+    const y = d3.scaleLinear([d3.min(pts, (d) => d.y) - 1, d3.max(pts, (d) => d.y) + 1], [H - m.b, m.t]).nice();
+    const svg = M.svg(el, W, H).attr('aria-label', 'Sample points with the current regression line');
+    svg.append('defs').append('clipPath').attr('id', 'ml-clip-lin').append('rect').attr('x', m.l).attr('y', m.t).attr('width', W - m.l - m.r).attr('height', H - m.t - m.b);
+    svg.append('g').attr('transform', `translate(0,${H - m.b})`).call(d3.axisBottom(x).ticks(5).tickSizeOuter(0)).attr('font-size', null).attr('font-family', null);
+    svg.append('g').attr('transform', `translate(${m.l},0)`).call(d3.axisLeft(y).ticks(5).tickSizeOuter(0)).attr('font-size', null).attr('font-family', null);
+    const f = (xv) => row.w * xv + row.b;
+    const plot = svg.append('g').attr('clip-path', 'url(#ml-clip-lin)');
+    plot.append('g').selectAll('line').data(pts).join('line')
+      .attr('x1', (d) => x(d.x)).attr('x2', (d) => x(d.x)).attr('y1', (d) => y(d.y)).attr('y2', (d) => y(f(d.x)))
+      .style('stroke', M.color.c1).attr('stroke-opacity', 0.6).attr('stroke-width', 1.2);
+    plot.append('line').attr('x1', x(0)).attr('x2', x(10)).attr('y1', y(f(0))).attr('y2', y(f(10)))
+      .style('stroke', M.color.hi).attr('stroke-width', 3).attr('stroke-linecap', 'round');
+    plot.append('g').selectAll('circle').data(pts).join('circle').attr('cx', (d) => x(d.x)).attr('cy', (d) => y(d.y)).attr('r', 3.6)
+      .style('fill', M.color.c0).style('stroke', 'var(--color-panel)').attr('stroke-width', 0.8);
+    const tip = M.tip(el);
+    svg.on('pointermove', (event) => {
+      const [mx] = d3.pointer(event, svg.node());
+      const xv = x.invert(mx);
+      const p = pts.reduce((a, b) => (Math.abs(b.x - xv) < Math.abs(a.x - xv) ? b : a));
+      tip.show(event, [['x', M.fmt.f2(p.x)], ['y', M.fmt.f2(p.y)], ['ŷ', M.fmt.f2(f(p.x))], ['residual', M.fmt.f2(p.y - f(p.x))]]);
+    }).on('pointerleave', () => tip.hide());
+  });
+
+  dash.draw('lin-loss', (el) => {
+    const rs = M.ready(el, ['reg_gd']);
+    if (!rs) return;
+    const gd = rs[0], row = gd[linIdx(gd.length)];
+    M.lineChart(el, {
+      label: 'Mean squared error by iteration', xType: 'symlog', xName: 'Iteration', xFmt: d3.format('~s'),
+      xTicks: [0, 1, 10, 100, 1000].filter((t) => t <= d3.max(gd, (d) => d.iter)),
+      yFmt: d3.format('~s'), yFmtTip: M.fmt.f2,
+      series: [{ name: 'MSE', color: M.color.hi, dots: true, values: gd.map((d) => ({ x: d.iter, y: d.mse })) }],
+      marker: { x: row.iter }, xLabel: 'iteration (log scale)',
+    });
+  });
+
+  // ---- logistic
+  const LOG = ['log-step', 'log-chart', 'log-loss', 'log-iter', 'log-loss-v', 'log-acc', 'log-w'];
+  const logIdx = (n) => (S.logistic === null || S.logistic >= n ? n - 1 : S.logistic);
+  M.players.logistic = {
+    values: () => d3.range((M.rows('logit_gd') || []).length),
+    get: () => logIdx((M.rows('logit_gd') || []).length),
+    set: (v) => { S.logistic = v; M.redraw(LOG); },
+  };
+  const logRow = () => { const r = M.rows('logit_gd'); return r ? r[logIdx(r.length)] : null; };
+  dash.draw('log-step', (el) => {
+    const r = M.rows('logit_gd');
+    if (!r) { el.replaceChildren(); return; }
+    M.range(el, 'ml-log-step', r.length, logIdx(r.length), 'Gradient-descent step', (v) => { S.logistic = v; M.redraw(LOG); });
+  });
+  const logVal = (field, fmt) => (el) => { const row = logRow(); if (!row) { el.textContent = '—'; return; } M.value(el, 'logit_gd', { iter: row.iter }, field, fmt); };
+  dash.draw('log-iter', logVal('iter', M.fmt.int));
+  dash.draw('log-loss-v', logVal('logloss', M.fmt.f3));
+  dash.draw('log-acc', logVal('acc', M.fmt.pct));
+  dash.draw('log-w', logVal('w', M.fmt.f3));
+
+  dash.draw('log-chart', (el) => {
+    const rs = M.ready(el, ['logit_points', 'logit_gd']);
+    if (!rs) return;
+    const [pts, gd] = rs;
+    const row = gd[logIdx(gd.length)];
+    const W = Math.max(260, Math.round(el.clientWidth || 480)), H = Math.round(Math.min(W * 0.55, 340));
+    const m = { l: 34, r: 12, t: 12, b: 28 };
+    const x = d3.scaleLinear([0, 10], [m.l, W - m.r]);
+    const y = d3.scaleLinear([-0.08, 1.08], [H - m.b, m.t]);
+    const svg = M.svg(el, W, H).attr('aria-label', 'Binary sample points with the fitted sigmoid');
+    svg.append('g').attr('transform', `translate(0,${H - m.b})`).call(d3.axisBottom(x).ticks(5).tickSizeOuter(0)).attr('font-size', null).attr('font-family', null);
+    svg.append('g').attr('transform', `translate(${m.l},0)`).call(d3.axisLeft(y).tickValues([0, 0.5, 1]).tickSizeOuter(0)).attr('font-size', null).attr('font-family', null);
+    const sig = (xv) => 1 / (1 + Math.exp(-(row.w * xv + row.b)));
+    if (row.w > 1e-6) {
+      const xb = -row.b / row.w;
+      if (xb > 0 && xb < 10) svg.append('line').attr('x1', x(xb)).attr('x2', x(xb)).attr('y1', y(-0.08)).attr('y2', y(1.08))
+        .style('stroke', M.color.muted).attr('stroke-dasharray', '5 4').attr('stroke-width', 1.5);
+    }
+    svg.append('path').datum(d3.range(0, 10.001, 0.05)).attr('d', d3.line().x((v) => x(v)).y((v) => y(sig(v))))
+      .style('fill', 'none').style('stroke', M.color.hi).attr('stroke-width', 3).attr('stroke-linecap', 'round');
+    svg.append('g').selectAll('circle').data(pts).join('circle')
+      .attr('cx', (d) => x(d.x)).attr('cy', (d) => y(d.y + ((d.id % 5) - 2) * 0.012)).attr('r', 3.6)
+      .style('fill', (d) => (d.y === 1 ? M.color.c1 : M.color.c0)).style('stroke', 'var(--color-panel)').attr('stroke-width', 0.8);
+    const tip = M.tip(el);
+    svg.on('pointermove', (event) => {
+      const [mx] = d3.pointer(event, svg.node());
+      const xv = Math.max(0, Math.min(10, x.invert(mx)));
+      tip.show(event, [['x', M.fmt.f2(xv)], ['p', M.fmt.f3(sig(xv))]]);
+    }).on('pointerleave', () => tip.hide());
+  });
+
+  dash.draw('log-loss', (el) => {
+    const rs = M.ready(el, ['logit_gd']);
+    if (!rs) return;
+    const gd = rs[0], row = gd[logIdx(gd.length)];
+    M.lineChart(el, {
+      label: 'Log-loss by iteration', xType: 'symlog', xName: 'Iteration',
+      xTicks: [0, 10, 100, 1000].filter((t) => t <= d3.max(gd, (d) => d.iter)),
+      yFmt: d3.format('.1f'), yFmtTip: M.fmt.f3,
+      series: [{ name: 'Log-loss', color: M.color.hi, dots: true, values: gd.map((d) => ({ x: d.iter, y: d.logloss })) }],
+      marker: { x: row.iter }, xLabel: 'iteration (log scale)',
+    });
+  });
+})();
+</script>
+
+<script>
+// 3. Tree, 4. Forest, 5. Boosting
+(function () {
+  const M = window.ML8, S = M.state;
+  const metricVal = (model, key, field, fmt) => (el) => M.value(el, 'model_metrics', { model, param: S[key] }, field, fmt);
+  const paramPlayer = (model, key, names, interval) => {
+    M.players[key] = { values: () => M.params(model), get: () => S[key], set: (v) => { S[key] = v; M.redraw(names); }, interval };
+  };
+
+  // ---- tree
+  const TREE = ['tree-param', 'tree-chart', 'tree-rows', 'tree-gini', 'tree-train', 'tree-test'];
+  paramPlayer('tree', 'tree', TREE, 900);
+  dash.draw('tree-param', (el) => M.chips(el, M.params('tree'), S.tree, null, (v) => { S.tree = v; M.redraw(TREE); }));
+  dash.draw('tree-gini', (el) => M.value(el, 'tree_splits', { max_depth: S.tree, node: 0 }, 'gini', M.fmt.f3));
+  dash.draw('tree-train', metricVal('tree', 'tree', 'train_acc', M.fmt.pct));
+  dash.draw('tree-test', metricVal('tree', 'tree', 'test_acc', M.fmt.pct));
+  dash.draw('tree-chart', (el) => {
+    const rs = M.ready(el, ['surfaces', 'moons', 'grid', 'tree_splits']);
+    if (!rs) return;
+    const c = M.surfaceChart(el, { probs: M.surface('tree', S.tree), points: M.trainPoints(), label: 'Decision tree regions and splits' });
+    const splits = rs[3].filter((r) => r.max_depth === S.tree);
+    c.svg.append('g').selectAll('line').data(splits).join('line')
+      .attr('x1', (d) => c.x(d.sx0)).attr('x2', (d) => c.x(d.sx1)).attr('y1', (d) => c.y(d.sy0)).attr('y2', (d) => c.y(d.sy1))
+      .style('stroke', M.color.hi).attr('stroke-width', (d) => Math.max(1, 3 - d.node_depth * 0.4)).attr('stroke-linecap', 'round');
+  });
+  dash.draw('tree-rows', (tb) => {
+    const rows = M.rows('tree_splits');
+    if (!rows) { tb.replaceChildren(); return; }
+    tb.replaceChildren(...rows.filter((r) => r.max_depth === S.tree).map((r) => {
+      const tr = document.createElement('tr');
+      tr.setAttribute('data-key', encodeURIComponent(r.max_depth) + ',' + encodeURIComponent(r.node));
+      [String(r.node), String(r.node_depth), r.feature, M.fmt.f3(r.threshold), M.fmt.f3(r.gini), M.fmt.int(r.samples)].forEach((v, i) => {
+        const td = document.createElement('td');
+        td.textContent = v;
+        if (i === 1 || i >= 3) td.className = 'ml-num';
+        tr.appendChild(td);
+      });
+      return tr;
+    }));
+  });
+
+  // ---- forest
+  const FOREST = ['forest-param', 'forest-chart', 'forest-train', 'forest-test'];
+  paramPlayer('forest', 'forest', FOREST, 900);
+  dash.draw('forest-param', (el) => M.chips(el, M.params('forest'), S.forest, null, (v) => { S.forest = v; M.redraw(FOREST); }));
+  dash.draw('forest-train', metricVal('forest', 'forest', 'train_acc', M.fmt.pct));
+  dash.draw('forest-test', metricVal('forest', 'forest', 'test_acc', M.fmt.pct));
+  dash.draw('forest-chart', (el) => {
+    if (!M.ready(el, ['surfaces', 'moons', 'grid'])) return;
+    M.surfaceChart(el, { probs: M.surface('forest', S.forest), points: M.trainPoints(), label: 'Random forest vote' });
+  });
+  dash.draw('forest-members', (el) => {
+    const rs = M.ready(el, ['forest_members', 'grid']);
+    if (!rs) return;
+    const [mem, gr] = rs, g = gr[0], n = g.n;
+    const trees = Array.from(d3.group(mem, (r) => r.tree), ([t, rows]) => ({ t, rows }));
+    const size = 192;
+    const H = Math.round(size * (g.x2_max - g.x2_min) / (g.x1_max - g.x1_min));
+    el.replaceChildren(...trees.map(({ t, rows }) => {
+      const svg = d3.create('svg').attr('width', '100%').attr('viewBox', `0 0 ${size} ${H}`).attr('role', 'img').attr('aria-label', 'Tree ' + (t + 1));
+      const cx = (i) => Math.round(i * size / n), cy = (j) => Math.round(H - j * H / n);
+      svg.attr('shape-rendering', 'crispEdges').selectAll('rect').data(rows).join('rect')
+        .attr('x', (r) => cx(r.i)).attr('y', (r) => cy(r.j + 1))
+        .attr('width', (r) => cx(r.i + 1) - cx(r.i)).attr('height', (r) => cy(r.j) - cy(r.j + 1))
+        .style('fill', (r) => (r.p1 >= 0.5 ? M.color.c1 : M.color.c0)).attr('fill-opacity', (r) => (0.12 + 0.5 * Math.abs(r.p1 - 0.5) * 2).toFixed(3));
+      return svg.node();
+    }));
+  });
+
+  // ---- boosting
+  const BOOST = ['boost-param', 'boost-chart', 'boost-curve', 'boost-trees', 'boost-mistakes', 'boost-test'];
+  paramPlayer('boosting', 'boosting', BOOST, 800);
+  dash.draw('boost-param', (el) => M.chips(el, M.params('boosting'), S.boosting, null, (v) => { S.boosting = v; M.redraw(BOOST); }));
+  dash.draw('boost-trees', metricVal('boosting', 'boosting', 'param', M.fmt.int));
+  dash.draw('boost-mistakes', metricVal('boosting', 'boosting', 'train_mistakes', M.fmt.int));
+  dash.draw('boost-test', metricVal('boosting', 'boosting', 'test_acc', M.fmt.pct));
+  dash.draw('boost-chart', (el) => {
+    const rs = M.ready(el, ['surfaces', 'moons', 'grid', 'boost_mistakes']);
+    if (!rs) return;
+    const train = M.trainPoints();
+    const c = M.surfaceChart(el, { probs: M.surface('boosting', S.boosting), points: train, label: 'Gradient boosting regions with current mistakes' });
+    const wrong = new Set(rs[3].filter((r) => r.stage === S.boosting).map((r) => r.id));
+    c.svg.append('g').selectAll('circle').data(train.filter((p) => wrong.has(p.id))).join('circle')
+      .attr('cx', (d) => c.x(d.x1)).attr('cy', (d) => c.y(d.x2)).attr('r', 8)
+      .style('fill', 'none').style('stroke', M.color.hi).attr('stroke-width', 2);
+  });
+  dash.draw('boost-curve', (el) => {
+    const rs = M.ready(el, ['model_metrics']);
+    if (!rs) return;
+    const rows = rs[0].filter((r) => r.model === 'boosting');
+    M.lineChart(el, {
+      label: 'Training and test accuracy by number of trees', xName: 'Trees', xFmt: d3.format('d'),
+      yDomain: [Math.floor(d3.min(rows, (r) => Math.min(r.train_acc, r.test_acc)) * 20) / 20, 1],
+      yFmt: d3.format('.0%'), yFmtTip: M.fmt.pct,
+      series: [
+        { name: 'Training accuracy', color: 'var(--ml-f-tree)', dots: true, values: rows.map((r) => ({ x: r.param, y: r.train_acc })) },
+        { name: 'Test accuracy', color: M.color.muted, dash: true, dots: true, values: rows.map((r) => ({ x: r.param, y: r.test_acc })) },
+      ],
+      marker: { x: S.boosting }, xLabel: 'trees',
+    });
+  });
+})();
+</script>
+
+<script>
+// 6. KNN, 7. k-means
+(function () {
+  const M = window.ML8, S = M.state;
+  // ---- KNN
+  const KNN = ['knn-param', 'knn-chart', 'knn-vote', 'knn-train', 'knn-test'];
+  const neighbours = () => {
+    const train = M.trainPoints();
+    if (!train.length) return null;
+    const [qx, qy] = S.q;
+    const ds = train.map((p) => ({ p, d: Math.hypot(p.x1 - qx, p.x2 - qy) })).sort((a, b) => a.d - b.d);
+    return ds.slice(0, S.knn);
+  };
+  dash.draw('knn-param', (el) => M.chips(el, M.params('knn'), S.knn, null, (v) => { S.knn = v; M.redraw(KNN); }));
+  dash.draw('knn-train', (el) => M.value(el, 'model_metrics', { model: 'knn', param: S.knn }, 'train_acc', M.fmt.pct));
+  dash.draw('knn-test', (el) => M.value(el, 'model_metrics', { model: 'knn', param: S.knn }, 'test_acc', M.fmt.pct));
+  dash.draw('knn-vote', (el) => {
+    const nb = M.rows('moons') ? neighbours() : null;
+    if (!nb) { el.textContent = '—'; return; }
+    const ones = nb.filter((d) => d.p.label === 1).length;
+    const pred = ones * 2 > nb.length ? 1 : 0;
+    el.textContent = `${pred === 1 ? ones : nb.length - ones} of ${nb.length} neighbours are class ${pred}, so predict class ${pred}`;
+  });
+  dash.draw('knn-chart', (el) => {
+    if (!M.ready(el, ['surfaces', 'moons', 'grid'])) return;
+    const c = M.surfaceChart(el, { probs: M.surface('knn', S.knn), points: M.trainPoints(), label: 'KNN regions with the query point and its neighbours' });
+    const nb = neighbours();
+    const qx = c.x(S.q[0]), qy = c.y(S.q[1]);
+    const g = c.svg.append('g').style('pointer-events', 'none');
+    const r = c.x(S.q[0] + nb[nb.length - 1].d) - qx;
+    g.append('circle').attr('cx', qx).attr('cy', qy).attr('r', r).style('fill', M.color.hi).attr('fill-opacity', 0.08).style('stroke', M.color.hi).attr('stroke-width', 1.5);
+    g.selectAll('line').data(nb).join('line').attr('x1', qx).attr('y1', qy).attr('x2', (d) => c.x(d.p.x1)).attr('y2', (d) => c.y(d.p.x2))
+      .style('stroke', M.color.hi).attr('stroke-width', 1.5);
+    g.selectAll('.ml-nb').data(nb).join('circle').attr('class', 'ml-nb').attr('cx', (d) => c.x(d.p.x1)).attr('cy', (d) => c.y(d.p.x2)).attr('r', 6)
+      .style('fill', 'none').style('stroke', M.color.hi).attr('stroke-width', 1.8);
+    g.append('circle').attr('cx', qx).attr('cy', qy).attr('r', 6).style('fill', M.color.hi).style('stroke', 'var(--color-panel)').attr('stroke-width', 1.5);
+    c.svg.style('cursor', 'crosshair').on('click', (event) => {
+      const [mx, my] = d3.pointer(event, c.svg.node());
+      S.q = [c.x.invert(mx), c.y.invert(my)];
+      M.redraw(['knn-chart', 'knn-vote']);
+    });
+  });
+
+  // ---- k-means
+  const KM = ['km-param', 'km-step', 'km-chart', 'km-elbow', 'km-iter', 'km-inertia', 'km-ari'];
+  const iters = () => {
+    const st = M.rows('kmeans_steps');
+    return st ? Array.from(new Set(st.filter((r) => r.k === S.kmK).map((r) => r.iter))).sort((a, b) => a - b) : [];
+  };
+  const curIter = () => { const it = iters(); if (!it.length) return null; return S.kmIter === null || !it.includes(S.kmIter) ? it[it.length - 1] : S.kmIter; };
+  M.players.kmeans = { values: iters, get: curIter, set: (v) => { S.kmIter = v; M.redraw(KM); }, interval: 900 };
+  dash.draw('km-param', (el) => {
+    const e = M.rows('kmeans_elbow');
+    if (!e) { el.replaceChildren(); return; }
+    M.chips(el, e.map((r) => r.k), S.kmK, null, (v) => { S.kmK = v; S.kmIter = null; M.redraw(KM); });
+  });
+  dash.draw('km-step', (el) => {
+    const it = iters();
+    if (!it.length) { el.replaceChildren(); return; }
+    M.range(el, 'ml-km-step', it.length, it.indexOf(curIter()), 'Iteration', (i) => { S.kmIter = it[i]; M.redraw(KM); });
+  });
+  dash.draw('km-iter', (el) => M.value(el, 'kmeans_steps', { k: S.kmK, iter: curIter(), cluster: 0 }, 'iter', M.fmt.int));
+  dash.draw('km-inertia', (el) => M.value(el, 'kmeans_elbow', { k: S.kmK }, 'inertia', M.fmt.f1));
+  dash.draw('km-ari', (el) => M.value(el, 'kmeans_elbow', { k: S.kmK }, 'ari', M.fmt.f3));
+  dash.draw('km-chart', (el) => {
+    const rs = M.ready(el, ['blobs', 'kmeans_steps', 'kmeans_assign']);
+    if (!rs) return;
+    const [pts, steps, assign] = rs;
+    const it = curIter();
+    const cols = ['var(--ml-c0)', 'var(--ml-f-tree)', 'var(--ml-f-dist)', 'var(--ml-c1)', 'var(--ml-hi)'];
+    const ex = d3.extent(pts, (d) => d.x1), ey = d3.extent(pts, (d) => d.x2);
+    const pad = 0.8, sx = ex[1] - ex[0] + 2 * pad, sy = ey[1] - ey[0] + 2 * pad;
+    const W = Math.max(260, Math.round(el.clientWidth || 480));
+    const H = Math.round(Math.min(W * sy / sx, 420));
+    const scale = Math.min(W / sx, H / sy);
+    const cx0 = (ex[0] + ex[1]) / 2, cy0 = (ey[0] + ey[1]) / 2;
+    const x = (v) => W / 2 + (v - cx0) * scale, y = (v) => H / 2 - (v - cy0) * scale;
+    const svg = M.svg(el, W, H).attr('aria-label', 'K-means clusters and centres');
+    const a = new Map(assign.filter((r) => r.k === S.kmK && r.iter === it).map((r) => [r.id, r.cluster]));
+    svg.append('g').selectAll('circle').data(pts).join('circle').attr('cx', (d) => x(d.x1)).attr('cy', (d) => y(d.x2)).attr('r', 3.6)
+      .style('fill', (d) => cols[a.get(d.id) % cols.length]).attr('fill-opacity', 0.85);
+    const ks = steps.filter((r) => r.k === S.kmK && r.iter <= it);
+    const byC = d3.group(ks, (r) => r.cluster);
+    for (const [cl, rows] of byC) {
+      rows.sort((p, q) => p.iter - q.iter);
+      const col = cols[cl % cols.length];
+      svg.append('path').attr('d', d3.line().x((r) => x(r.cx)).y((r) => y(r.cy))(rows))
+        .style('fill', 'none').style('stroke', col).attr('stroke-opacity', 0.55).attr('stroke-width', 1.5).attr('stroke-dasharray', '3 3');
+      const last = rows[rows.length - 1], s = 8;
+      const gx = svg.append('g').attr('transform', `translate(${x(last.cx)},${y(last.cy)})`);
+      gx.append('path').attr('d', `M${-s},${-s}L${s},${s}M${-s},${s}L${s},${-s}`).style('stroke', 'var(--color-panel)').attr('stroke-width', 6).attr('stroke-linecap', 'round');
+      gx.append('path').attr('d', `M${-s},${-s}L${s},${s}M${-s},${s}L${s},${-s}`).style('stroke', col).attr('stroke-width', 3).attr('stroke-linecap', 'round');
+    }
+    const tip = M.tip(el);
+    svg.on('pointermove', (event) => {
+      const [mx, my] = d3.pointer(event, svg.node());
+      const p = pts.reduce((b, d) => (Math.hypot(x(d.x1) - mx, y(d.x2) - my) < Math.hypot(x(b.x1) - mx, y(b.x2) - my) ? d : b));
+      tip.show(event, [['Point', String(p.id)], ['Cluster', String(a.get(p.id))]]);
+    }).on('pointerleave', () => tip.hide());
+  });
+  dash.draw('km-elbow', (el) => {
+    const rs = M.ready(el, ['kmeans_elbow']);
+    if (!rs) return;
+    M.lineChart(el, {
+      label: 'Inertia by number of clusters', xName: 'k =', xFmt: d3.format('d'), xTicks: rs[0].map((r) => r.k),
+      yFmt: d3.format('~s'), yFmtTip: M.fmt.f1, height: 170,
+      series: [{ name: 'Inertia', color: 'var(--ml-f-dist)', dots: true, values: rs[0].map((r) => ({ x: r.k, y: r.inertia })) }],
+      marker: { x: S.kmK }, xLabel: 'clusters k',
+    });
+  });
+})();
+</script>
+
+<script>
+// 8. Neural network
+(function () {
+  const M = window.ML8, S = M.state;
+  const NN = ['nn-param', 'nn-chart', 'nn-loss', 'nn-loss-v', 'nn-train', 'nn-test'];
+  M.players.nn = { values: () => M.params('nn'), get: () => S.nn, set: (v) => { S.nn = v; M.redraw(NN); }, interval: 900 };
+  dash.draw('nn-param', (el) => M.chips(el, M.params('nn'), S.nn, null, (v) => { S.nn = v; M.redraw(NN); }));
+  dash.draw('nn-loss-v', (el) => M.value(el, 'nn_training', { epoch: S.nn }, 'loss', M.fmt.f3));
+  dash.draw('nn-train', (el) => M.value(el, 'nn_training', { epoch: S.nn }, 'train_acc', M.fmt.pct));
+  dash.draw('nn-test', (el) => M.value(el, 'nn_training', { epoch: S.nn }, 'test_acc', M.fmt.pct));
+  dash.draw('nn-chart', (el) => {
+    if (!M.ready(el, ['surfaces', 'moons', 'grid'])) return;
+    M.surfaceChart(el, { probs: M.surface('nn', S.nn), points: M.trainPoints(), label: 'Neural network decision surface' });
+  });
+  dash.draw('nn-loss', (el) => {
+    const rs = M.ready(el, ['nn_training']);
+    if (!rs) return;
+    M.lineChart(el, {
+      label: 'Training loss by epoch', xType: 'symlog', xName: 'Epoch', xFmt: d3.format('d'),
+      xTicks: [1, 10, 100, 400].filter((t) => t <= d3.max(rs[0], (r) => r.epoch)),
+      yFmt: d3.format('.1f'), yFmtTip: M.fmt.f3,
+      series: [{ name: 'Loss', color: M.color.hi, values: rs[0].map((r) => ({ x: r.epoch, y: r.loss })) }],
+      marker: { x: S.nn }, xLabel: 'epoch (log scale)',
+    });
+  });
+  dash.draw('nn-arch', (el) => {
+    const rs = M.ready(el, ['nn_weights']);
+    if (!rs) return;
+    const w = rs[0];
+    const layers = d3.max(w, (r) => r.layer) + 1;
+    const sizes = [];
+    for (let l = 0; l < layers; l++) {
+      const lr = w.filter((r) => r.layer === l);
+      sizes[l] = d3.max(lr, (r) => r.src) + 1;
+      sizes[l + 1] = d3.max(lr, (r) => r.dst) + 1;
+    }
+    const W = Math.max(240, Math.round(el.clientWidth || 320)), H = 220;
+    const svg = M.svg(el, W, H).attr('aria-label', 'Network diagram with trained weights');
+    const xs = d3.scalePoint(d3.range(sizes.length), [24, W - 24]);
+    const maxN = d3.max(sizes);
+    const pos = (l, i) => [xs(l), H / 2 + (i - (sizes[l] - 1) / 2) * ((H - 44) / Math.max(1, maxN - 1))];
+    const maxW = d3.max(w, (r) => Math.abs(r.weight));
+    svg.append('g').selectAll('line').data(w).join('line')
+      .attr('x1', (r) => pos(r.layer, r.src)[0]).attr('y1', (r) => pos(r.layer, r.src)[1])
+      .attr('x2', (r) => pos(r.layer + 1, r.dst)[0]).attr('y2', (r) => pos(r.layer + 1, r.dst)[1])
+      .style('stroke', (r) => (r.weight >= 0 ? M.color.c1 : M.color.c0))
+      .attr('stroke-width', (r) => (0.3 + 3.2 * Math.abs(r.weight) / maxW).toFixed(2)).attr('stroke-opacity', 0.65);
+    const nodes = sizes.flatMap((n, l) => d3.range(n).map((i) => ({ l, i })));
+    svg.append('g').selectAll('circle').data(nodes).join('circle')
+      .attr('cx', (d) => pos(d.l, d.i)[0]).attr('cy', (d) => pos(d.l, d.i)[1]).attr('r', 7)
+      .style('fill', 'var(--color-panel)').style('stroke', 'var(--ml-f-nn)').attr('stroke-width', 2);
+    svg.append('g').selectAll('text').data(sizes).join('text')
+      .attr('x', (d, l) => xs(l)).attr('y', H - 2).attr('text-anchor', 'middle')
+      .text((d, l) => (l === 0 ? 'input ' : l === sizes.length - 1 ? 'output ' : 'hidden ') + d);
+    const tip = M.tip(el);
+    svg.on('pointermove', (event) => {
+      const [mx, my] = d3.pointer(event, svg.node());
+      let best = null, bd = 1e9;
+      for (const r of w) {
+        const [x1, y1] = pos(r.layer, r.src), [x2, y2] = pos(r.layer + 1, r.dst);
+        const t = Math.max(0, Math.min(1, ((mx - x1) * (x2 - x1) + (my - y1) * (y2 - y1)) / ((x2 - x1) ** 2 + (y2 - y1) ** 2)));
+        const d = Math.hypot(mx - (x1 + t * (x2 - x1)), my - (y1 + t * (y2 - y1)));
+        if (d < bd) { bd = d; best = r; }
+      }
+      if (best && bd < 8) tip.show(event, [['Layer ' + (best.layer + 1)], ['weight', M.fmt.f3(best.weight)]]); else tip.hide();
+    }).on('pointerleave', () => tip.hide());
+  });
+})();
+</script>

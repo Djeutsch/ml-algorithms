@@ -1,0 +1,9 @@
+jupyter-book>=2.1
+numpy>=1.26
+pandas>=2.1
+matplotlib>=3.8
+scikit-learn>=1.4
+jupytext>=1.16
+nbclient>=0.10
+nbformat>=5.10
+ipykernel>=6.29

@@ -1,0 +1,9 @@
+key,algorithm,family,task,metric,value
+linear,Linear regression,Linear models,Regression,R² (sample line),0.8639
+logistic,Logistic regression,Linear models,Classification,Test accuracy (moons),0.8333
+tree,Decision tree,Tree models,Classification,"Test accuracy (moons, depth 4)",0.8833
+forest,Random forest,Tree models,Classification,"Test accuracy (moons, 100 trees)",0.9000
+boosting,Gradient boosting,Tree models,Classification,"Test accuracy (moons, 60 stages)",0.8750
+knn,K-nearest neighbours,Distance-based,Classification,"Test accuracy (moons, k = 15)",0.9083
+kmeans,K-means,Distance-based,Clustering,"Adjusted Rand index (blobs, k = 3)",1.0000
+nn,Neural network,Neural networks,Classification,"Test accuracy (moons, 400 epochs)",0.9333

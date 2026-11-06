@@ -8,7 +8,7 @@ project:
   license:
     content: CC-BY-4.0
     code: MIT
-  github: https://github.com/__OWNER__/__REPO__
+  github: https://github.com/Djeutsch/ml-algorithms
   jupyter: false
   exports: []
   toc:

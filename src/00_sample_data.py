@@ -22,7 +22,7 @@
 #   something you install:
 #
 # ```text
-# eight-ml-algorithms/
+# ml-algorithms/
 # ├── ml8/
 # │   ├── data.py        the four datasets on this page
 # │   ├── scratch.py     the formulas, written from scratch in NumPy

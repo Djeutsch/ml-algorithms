@@ -7,7 +7,7 @@
 
 # Eight ML Algorithms, Slowed Down
 
-[![Deploy book and dashboard](https://github.com/__OWNER__/__REPO__/actions/workflows/deploy.yml/badge.svg)](https://github.com/__OWNER__/__REPO__/actions/workflows/deploy.yml)
+[![Deploy book and dashboard](https://github.com/Djeutsch/ml-algorithms/actions/workflows/deploy.yml/badge.svg)](https://github.com/Djeutsch/ml-algorithms/actions/workflows/deploy.yml)
 
 An interactive dashboard and a Jupyter Book that unpack an "8 algorithms · under 60 seconds"
 video: linear regression, logistic regression, decision tree, random forest, gradient
@@ -16,8 +16,8 @@ sample data, and the dashboard and book always show the same numbers.
 
 | | Live link | Source |
 |---|---|---|
-| 📘 Jupyter Book | https://__OWNER__.github.io/__REPO__/ | `myst.yml`, `intro.md`, `notebooks/`, `src/`, `ml8/` |
-| 📊 Dashboard | https://__OWNER__.github.io/__REPO__/dashboard/ | `dashboard/` |
+| 📘 Jupyter Book | https://djeutsch.github.io/ml-algorithms/ | `myst.yml`, `intro.md`, `notebooks/`, `src/`, `ml8/` |
+| 📊 Dashboard | https://djeutsch.github.io/ml-algorithms/dashboard/ | `dashboard/` |
 
 Both are deployed to GitHub Pages by `.github/workflows/deploy.yml` on every push to `main`.
 
@@ -26,8 +26,8 @@ Both are deployed to GitHub Pages by `.github/workflows/deploy.yml` on every pus
 ## Quick start
 
 ```bash
-git clone https://github.com/__OWNER__/__REPO__.git
-cd __REPO__
+git clone https://github.com/Djeutsch/ml-algorithms.git
+cd ml-algorithms
 python -m venv .venv
 source .venv/bin/activate          # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
@@ -230,8 +230,8 @@ To deploy your own fork:
 
 1. Fork or push this repository to GitHub.
 2. **Settings → Pages → Build and deployment → Source: GitHub Actions.**
-3. Replace `__OWNER__/__REPO__` in `README.md`, `intro.md` and `myst.yml` with your
-   user and repository name.
+3. Replace `Djeutsch/ml-algorithms` and `djeutsch.github.io/ml-algorithms` in `README.md`,
+   `intro.md` and `myst.yml` with your user and repository name.
 4. Push to `main`. The site appears at `https://<user>.github.io/<repo>/`.
 
 ## Troubleshooting

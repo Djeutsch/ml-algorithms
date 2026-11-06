@@ -5,7 +5,7 @@ The source video packs eight machine-learning algorithms into about forty second
 frames of animation, while a grid of eight buttons lights up in four colour families.
 
 ```{tip}
-Prefer to explore by clicking? The [interactive dashboard](https://__OWNER__.github.io/__REPO__/dashboard/) runs all eight algorithms on the same sample data, with sliders, Play buttons and click-to-query.
+Prefer to explore by clicking? The [interactive dashboard](https://djeutsch.github.io/ml-algorithms/dashboard/) runs all eight algorithms on the same sample data, with sliders, Play buttons and click-to-query.
 ```
 
 This book replays each frame slowly. Every chapter states the video's formula,
@@ -47,7 +47,7 @@ All shared code lives in the `ml8` package next to this page: `ml8/data.py` (dat
 `ml8/plotting.py` (the video's dark style). Every chapter opens with an **Imports** section
 showing what it loads, and [The sample data](notebooks/00_sample_data.ipynb) explains how
 the imports work. `scripts/export_dashboard_data.py` writes the
-CSV files behind the [companion dashboard](https://__OWNER__.github.io/__REPO__/dashboard/) from the same code, so the two always agree.
+CSV files behind the [companion dashboard](https://djeutsch.github.io/ml-algorithms/dashboard/) from the same code, so the two always agree.
 
 ## Running it
 

@@ -20,6 +20,8 @@ HEAD = """<!doctype html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Eight ML Algorithms</title>
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="logo.png">
 <meta name="description" content="Interactive dashboard: eight machine-learning algorithms run on sample data.">
 <style>
   :root {
@@ -52,7 +54,8 @@ HEAD = """<!doctype html>
   #dash-root { padding-block: 24px 48px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
   .dash-skeleton { background: linear-gradient(90deg, var(--color-border-line), transparent 60%); background-size: 200% 100%; border-radius: var(--cds-radius); opacity: .5; }
   .site-nav { max-width: 80rem; margin: 0 auto 16px; font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
-  .site-nav a { color: inherit; }
+  .site-nav a { color: inherit; display: inline-flex; align-items: center; gap: 8px; }
+  .site-nav img { width: 28px; height: 28px; }
 </style>
 <script src="vendor/d3.v7.9.0.min.js"></script>
 <script>window.DASH_SOURCES = __SOURCES__;</script>
@@ -60,7 +63,7 @@ HEAD = """<!doctype html>
 </head>
 <body>
 <div id="dash-root">
-<nav class="site-nav"><a href="../">← Companion Jupyter Book</a></nav>
+<nav class="site-nav"><a href="../"><img src="logo.png" alt="">← Companion Jupyter Book</a></nav>
 """
 FOOT = """
 </div>

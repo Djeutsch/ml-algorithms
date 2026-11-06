@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="288pt" height="288pt" viewBox="0 0 288 288" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:date>2026-11-05T17:17:14.489549</dc:date>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Matplotlib v3.11.2, https://matplotlib.org/</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 288 
+L 288 288 
+L 288 0 
+L 0 0 
+L 0 288 
+z
+" style="fill: none; opacity: 0"/>
+  </g>
+  <g id="axes_1">
+   <g id="patch_2">
+    <path d="M 57.6 282.24 
+L 230.4 282.24 
+Q 282.24 282.24 282.24 230.4 
+L 282.24 57.6 
+Q 282.24 5.76 230.4 5.76 
+L 57.6 5.76 
+Q 5.76 5.76 5.76 57.6 
+L 5.76 230.4 
+Q 5.76 282.24 57.6 282.24 
+z
+" clip-path="url(#p3da455f3c0)" style="fill: #0d1117"/>
+   </g>
+   <g id="patch_3">
+    <path d="M 36.72 133.92 
+L 65.52 133.92 
+Q 75.6 133.92 75.6 123.84 
+L 75.6 72 
+Q 75.6 61.92 65.52 61.92 
+L 36.72 61.92 
+Q 26.64 61.92 26.64 72 
+L 26.64 123.84 
+Q 26.64 133.92 36.72 133.92 
+z
+" clip-path="url(#p3da455f3c0)" style="fill: #4cb8e8; opacity: 0.95"/>
+   </g>
+   <g id="patch_4">
+    <path d="M 98.64 133.92 
+L 127.44 133.92 
+Q 137.52 133.92 137.52 123.84 
+L 137.52 72 
+Q 137.52 61.92 127.44 61.92 
+L 98.64 61.92 
+Q 88.56 61.92 88.56 72 
+L 88.56 123.84 
+Q 88.56 133.92 98.64 133.92 
+z
+" clip-path="url(#p3da455f3c0)" style="fill: #7fb069; opacity: 0.95"/>
+   </g>
+   <g id="patch_5">
+    <path d="M 160.56 133.92 
+L 189.36 133.92 
+Q 199.44 133.92 199.44 123.84 
+L 199.44 72 
+Q 199.44 61.92 189.36 61.92 
+L 160.56 61.92 
+Q 150.48 61.92 150.48 72 
+L 150.48 123.84 
+Q 150.48 133.92 160.56 133.92 
+z
+" clip-path="url(#p3da455f3c0)" style="fill: #b48ce6; opacity: 0.95"/>
+   </g>
+   <g id="patch_6">
+    <path d="M 222.48 133.92 
+L 251.28 133.92 
+Q 261.36 133.92 261.36 123.84 
+L 261.36 72 
+Q 261.36 61.92 251.28 61.92 
+L 222.48 61.92 
+Q 212.4 61.92 212.4 72 
+L 212.4 123.84 
+Q 212.4 133.92 222.48 133.92 
+z
+" clip-path="url(#p3da455f3c0)" style="fill: #f2e341; opacity: 0.95"/>
+   </g>
+   <g id="patch_7">
+    <path d="M 36.72 226.08 
+L 65.52 226.08 
+Q 75.6 226.08 75.6 216 
+L 75.6 164.16 
+Q 75.6 154.08 65.52 154.08 
+L 36.72 154.08 
+Q 26.64 154.08 26.64 164.16 
+L 26.64 216 
+Q 26.64 226.08 36.72 226.08 
+z
+" clip-path="url(#p3da455f3c0)" style="fill: #4cb8e8; opacity: 0.6"/>
+   </g>
+   <g id="patch_8">
+    <path d="M 98.64 226.08 
+L 127.44 226.08 
+Q 137.52 226.08 137.52 216 
+L 137.52 164.16 
+Q 137.52 154.08 127.44 154.08 
+L 98.64 154.08 
+Q 88.56 154.08 88.56 164.16 
+L 88.56 216 
+Q 88.56 226.08 98.64 226.08 
+z
+" clip-path="url(#p3da455f3c0)" style="fill: #7fb069; opacity: 0.6"/>
+   </g>
+   <g id="patch_9">
+    <path d="M 160.56 226.08 
+L 189.36 226.08 
+Q 199.44 226.08 199.44 216 
+L 199.44 164.16 
+Q 199.44 154.08 189.36 154.08 
+L 160.56 154.08 
+Q 150.48 154.08 150.48 164.16 
+L 150.48 216 
+Q 150.48 226.08 160.56 226.08 
+z
+" clip-path="url(#p3da455f3c0)" style="fill: #b48ce6; opacity: 0.6"/>
+   </g>
+   <g id="patch_10">
+    <path d="M 222.48 226.08 
+L 251.28 226.08 
+Q 261.36 226.08 261.36 216 
+L 261.36 164.16 
+Q 261.36 154.08 251.28 154.08 
+L 222.48 154.08 
+Q 212.4 154.08 212.4 164.16 
+L 212.4 216 
+Q 212.4 226.08 222.48 226.08 
+z
+" clip-path="url(#p3da455f3c0)" style="fill: #f2e341; opacity: 0.6"/>
+   </g>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="p3da455f3c0">
+   <rect x="0" y="0" width="288" height="288"/>
+  </clipPath>
+ </defs>
+</svg>

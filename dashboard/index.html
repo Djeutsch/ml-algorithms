@@ -4,6 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Eight ML Algorithms</title>
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="logo.png">
 <meta name="description" content="Interactive dashboard: eight machine-learning algorithms run on sample data.">
 <style>
   :root {
@@ -36,7 +38,8 @@
   #dash-root { padding-block: 24px 48px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
   .dash-skeleton { background: linear-gradient(90deg, var(--color-border-line), transparent 60%); background-size: 200% 100%; border-radius: var(--cds-radius); opacity: .5; }
   .site-nav { max-width: 80rem; margin: 0 auto 16px; font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
-  .site-nav a { color: inherit; }
+  .site-nav a { color: inherit; display: inline-flex; align-items: center; gap: 8px; }
+  .site-nav img { width: 28px; height: 28px; }
 </style>
 <script src="vendor/d3.v7.9.0.min.js"></script>
 <script>window.DASH_SOURCES = {"blobs": "data/blobs.csv", "boost_mistakes": "data/boost_mistakes.csv", "forest_members": "data/forest_members.csv", "grid": "data/grid.csv", "kmeans_assign": "data/kmeans_assign.csv", "kmeans_elbow": "data/kmeans_elbow.csv", "kmeans_steps": "data/kmeans_steps.csv", "logit_gd": "data/logit_gd.csv", "logit_points": "data/logit_points.csv", "model_metrics": "data/model_metrics.csv", "moons": "data/moons.csv", "nn_training": "data/nn_training.csv", "nn_weights": "data/nn_weights.csv", "reg_gd": "data/reg_gd.csv", "reg_points": "data/reg_points.csv", "scorecard": "data/scorecard.csv", "surfaces": "data/surfaces.csv", "tree_splits": "data/tree_splits.csv"};</script>
@@ -44,7 +47,7 @@
 </head>
 <body>
 <div id="dash-root">
-<nav class="site-nav"><a href="../">← Companion Jupyter Book</a></nav>
+<nav class="site-nav"><a href="../"><img src="logo.png" alt="">← Companion Jupyter Book</a></nav>
 <meta name="dash-one-writer">
 <style>
   .ml8 {

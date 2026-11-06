@@ -27,3 +27,6 @@ site:
   template: book-theme
   options:
     folders: true
+    logo: images/logo.svg
+    logo_text: Eight ML Algorithms
+    favicon: images/favicon.ico

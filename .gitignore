@@ -2,5 +2,10 @@ _build/
 __pycache__/
 .ipynb_checkpoints/
 .venv/
+venv/
 node_modules/
 .DS_Store
+
+# OS and editor
+.DS_Store
+.vscode/

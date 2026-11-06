@@ -16,8 +16,38 @@
 # \partial_w L = \frac1n\sum_i (p_i - y_i)\,x_i,\quad \partial_b L = \frac1n\sum_i (p_i - y_i).
 # ```
 
+# %% [markdown]
+# ## Imports
+#
+# `ml8` is the book's own package; [The sample data](00_sample_data.ipynb) explains how it is
+# imported. This chapter uses:
+#
+# | File | What this chapter uses |
+# |---|---|
+# | `ml8/data.py` | `data.logistic_data`: the 1-D logistic sample<br>`data.moons_arrays`: two-moons train and test arrays (`X_train, y_train, X_test, y_test`) |
+# | `ml8/scratch.py` | `scratch.logistic_gd`: gradient descent for logistic regression<br>`scratch.sigmoid`: the function $\sigma(z)$ |
+# | `ml8/models.py` | `models.logistic_2d`: a scikit-learn `LogisticRegression` for the two-moons data<br>`models.LOGISTIC_RECORD`: the gradient-descent steps to record |
+# | `ml8/plotting.py` | `P.plot_surface`: draws a decision surface and the points<br>`P.point_colors`: colours points by class<br>the palette (`P.FG`, `P.YELLOW`) |
+
 # %%
-#SETUP
+# ml8 sits one folder above notebooks/, so put that folder on Python's search path
+import sys
+sys.path.insert(0, "..")
+
+# Installed packages
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+from sklearn.linear_model import LogisticRegression
+
+# The book's own modules
+from ml8 import data              # ml8/data.py: the seeded sample datasets
+from ml8 import models            # ml8/models.py: shared model settings
+from ml8 import plotting as P     # ml8/plotting.py: colours and plot helpers
+from ml8 import scratch           # ml8/scratch.py: the from-scratch formulas
+
+P.use_style()  # the dark style used by every figure
+pd.set_option("display.precision", 4)
 
 # %%
 lg = data.logistic_data()
@@ -34,9 +64,7 @@ gd
 # is close to, but not exactly at, the optimum.
 
 # %%
-from sklearn.linear_model import LogisticRegression
-
-sk = LogisticRegression(penalty=None).fit(x[:, None], y)
+sk = LogisticRegression(C=np.inf).fit(x[:, None], y)
 pd.DataFrame({"w": [w, sk.coef_[0, 0]], "b": [b, sk.intercept_[0]], "decision boundary x = -b/w": [-b / w, -sk.intercept_[0] / sk.coef_[0, 0]]},
              index=["gradient descent", "scikit-learn"])
 

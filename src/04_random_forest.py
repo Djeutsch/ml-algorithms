@@ -18,8 +18,35 @@
 # both and measure how often they disagree.
 # ```
 
+# %% [markdown]
+# ## Imports
+#
+# `ml8` is the book's own package; [The sample data](00_sample_data.ipynb) explains how it is
+# imported. This chapter uses:
+#
+# | File | What this chapter uses |
+# |---|---|
+# | `ml8/data.py` | `data.grid`: the grid of points behind every decision surface<br>`data.moons_arrays`: two-moons train and test arrays (`X_train, y_train, X_test, y_test`) |
+# | `ml8/models.py` | `models.forest`: a scikit-learn `RandomForestClassifier` of a given size<br>`models.FOREST_SIZES`: the forest sizes to compare |
+# | `ml8/plotting.py` | `P.plot_surface`: draws a decision surface and the points<br>the palette (`P.FG`, `P.GREEN`) |
+
 # %%
-#SETUP
+# ml8 sits one folder above notebooks/, so put that folder on Python's search path
+import sys
+sys.path.insert(0, "..")
+
+# Installed packages
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+
+# The book's own modules
+from ml8 import data              # ml8/data.py: the seeded sample datasets
+from ml8 import models            # ml8/models.py: shared model settings
+from ml8 import plotting as P     # ml8/plotting.py: colours and plot helpers
+
+P.use_style()  # the dark style used by every figure
+pd.set_option("display.precision", 4)
 
 # %%
 Xtr, ytr, Xte, yte = data.moons_arrays()

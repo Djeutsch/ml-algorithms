@@ -27,6 +27,8 @@ site:
   template: book-theme
   options:
     folders: true
-    logo: images/logo.svg
-    logo_text: Eight ML Algorithms
+    logo: images/logo-wide-light.svg
+    logo_dark: images/logo-wide-dark.svg
+    logo_alt: Eight ML Algorithms, Slowed Down
     favicon: images/favicon.ico
+    style: book.css

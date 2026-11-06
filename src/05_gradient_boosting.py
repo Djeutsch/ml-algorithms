@@ -14,8 +14,38 @@
 # learning rate $\eta$ shrinks each step. The video counts this down, "8 trees · 2
 # mistakes", then "60 trees · 0 mistakes".
 
+# %% [markdown]
+# ## Imports
+#
+# `ml8` is the book's own package; [The sample data](00_sample_data.ipynb) explains how it is
+# imported. This chapter uses:
+#
+# | File | What this chapter uses |
+# |---|---|
+# | `ml8/data.py` | `data.grid`: the grid of points behind every decision surface<br>`data.moons_arrays`: two-moons train and test arrays (`X_train, y_train, X_test, y_test`)<br>`data.SEED`: the shared random seed |
+# | `ml8/scratch.py` | `scratch.sigmoid`: the function $\sigma(z)$ |
+# | `ml8/models.py` | `models.boosting`: a scikit-learn `GradientBoostingClassifier` with the book's settings<br>`models.BOOST_STAGES`: the boosting stages to compare |
+# | `ml8/plotting.py` | `P.plot_surface`: draws a decision surface and the points<br>the palette (`P.FG`, `P.GREEN`) |
+
 # %%
-#SETUP
+# ml8 sits one folder above notebooks/, so put that folder on Python's search path
+import sys
+sys.path.insert(0, "..")
+
+# Installed packages
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+from sklearn.tree import DecisionTreeRegressor
+
+# The book's own modules
+from ml8 import data              # ml8/data.py: the seeded sample datasets
+from ml8 import models            # ml8/models.py: shared model settings
+from ml8 import plotting as P     # ml8/plotting.py: colours and plot helpers
+from ml8 import scratch           # ml8/scratch.py: the from-scratch formulas
+
+P.use_style()  # the dark style used by every figure
+pd.set_option("display.precision", 4)
 
 # %%
 Xtr, ytr, Xte, yte = data.moons_arrays()
@@ -33,15 +63,13 @@ print(gb)
 # mistake counts should track closely.
 
 # %%
-from sklearn.tree import DecisionTreeRegressor
-
 def boost_scratch(X, y, n_trees=60, eta=0.3, depth=3):
     F = np.full(len(y), np.log(y.mean() / (1 - y.mean())))
     trees, mistakes = [], []
     for m in range(n_trees):
         p = scratch.sigmoid(F)
         r = y - p                                        # negative gradient of log-loss
-        h = DecisionTreeRegressor(max_depth=depth, criterion="friedman_mse", random_state=data.SEED).fit(X, r)
+        h = DecisionTreeRegressor(max_depth=depth, criterion="squared_error", random_state=data.SEED).fit(X, r)
         leaf = h.apply(X)
         gamma = {l: r[leaf == l].sum() / max((p * (1 - p))[leaf == l].sum(), 1e-12) for l in np.unique(leaf)}
         F = F + eta * np.array([gamma[l] for l in leaf])  # Newton step per leaf

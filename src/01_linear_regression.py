@@ -20,8 +20,38 @@
 # Each step moves $(w, b)$ a little way against the gradient: $w \leftarrow w - \alpha\,\partial_w$,
 # $b \leftarrow b - \alpha\,\partial_b$.
 
+# %% [markdown]
+# ## Imports
+#
+# `ml8` is the book's own package; [The sample data](00_sample_data.ipynb) explains how it is
+# imported. This chapter uses:
+#
+# | File | What this chapter uses |
+# |---|---|
+# | `ml8/data.py` | `data.regression_data`: the 1-D regression sample |
+# | `ml8/scratch.py` | `scratch.linear_gd`: gradient descent for $\hat y = wx + b$ |
+# | `ml8/models.py` | `models.LINEAR_RECORD`: the gradient-descent steps to record |
+# | `ml8/plotting.py` | the palette (`P.BLUE`, `P.RED`, `P.YELLOW`) |
+
 # %%
-#SETUP
+# ml8 sits one folder above notebooks/, so put that folder on Python's search path
+import sys
+sys.path.insert(0, "..")
+
+# Installed packages
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+from sklearn.linear_model import LinearRegression
+
+# The book's own modules
+from ml8 import data              # ml8/data.py: the seeded sample datasets
+from ml8 import models            # ml8/models.py: shared model settings
+from ml8 import plotting as P     # ml8/plotting.py: colours and plot helpers
+from ml8 import scratch           # ml8/scratch.py: the from-scratch formulas
+
+P.use_style()  # the dark style used by every figure
+pd.set_option("display.precision", 4)
 
 # %%
 reg = data.regression_data()
@@ -37,8 +67,6 @@ gd
 # descent, `numpy.polyfit` and scikit-learn should agree.
 
 # %%
-from sklearn.linear_model import LinearRegression
-
 X = np.c_[np.ones_like(x), x]
 beta = np.linalg.solve(X.T @ X, X.T @ y)
 sk = LinearRegression().fit(x[:, None], y)

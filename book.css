@@ -1,0 +1,24 @@
+/* Wide logo at the top of the left sidebar. The MyST theme keeps the logo in the top
+   bar and has no sidebar header, so on wide screens the logo is moved down into the
+   sidebar column and the table of contents starts below it. */
+.myst-home-link-logo img {
+  height: 2.75rem;
+  max-width: none;
+}
+
+@media (min-width: 1280px) {
+  .myst-home-link-logo {
+    height: 0;
+    margin: 0;
+    padding: 0;
+    position: relative;
+    left: -2rem;
+    top: 5rem;
+  }
+  .myst-home-link-logo img {
+    height: 4.75rem;
+  }
+  .myst-primary-sidebar-nav {
+    margin-top: 4.75rem;
+  }
+}

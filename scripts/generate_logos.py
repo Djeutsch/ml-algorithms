@@ -1,7 +1,9 @@
 """Generate ten candidate logos for the book and install the chosen one.
 
-Every logo is drawn with matplotlib in the book's own palette (ml8.plotting) on
-a dark rounded tile, so it reads well on both the light and dark book themes.
+Every logo is drawn with matplotlib in the book's own palette (ml8.plotting). The
+square version sits on a dark rounded tile. The chosen logo is also built into a
+wide lockup (mark on the left, stacked title on the right) with no background, in
+one version per book theme, for the top of the book's sidebar.
 
 Usage:
     python scripts/generate_logos.py                 # draw all ten + contact sheet
@@ -11,7 +13,9 @@ Usage:
 Outputs:
     logos/candidates/NN_<name>.svg / .png   every candidate (512 px PNG)
     logos/contact_sheet.png                 all ten side by side, for picking
-    images/logo.svg, images/logo.png        the chosen logo   (--use)
+    images/logo.svg, images/logo.png        the chosen logo, square tile (--use)
+    images/logo-wide-light.svg / -dark.svg  wide lockups for the book (--use)
+    images/logo-wide-light.png / -dark.png  the same, for the README (--use)
     images/favicon.ico                      16/32/48 px icon  (--use)
     dashboard/favicon.ico                   same icon for the dashboard (--use)
 """
@@ -20,6 +24,8 @@ from __future__ import annotations
 import argparse
 import shutil
 import sys
+from dataclasses import dataclass
+from io import BytesIO
 from pathlib import Path
 
 import matplotlib
@@ -41,14 +47,28 @@ MUTED = "#8b949e"
 plt.rcParams["svg.fonttype"] = "path"  # text becomes outlines: no font needed to view the SVG
 
 
+@dataclass(frozen=True)
+class Theme:
+    ink: str             # main strokes and text
+    paper: str           # what the logo sits on
+    accent: str = YELLOW  # top line of the lockup's title
+    tile: bool = False   # draw the dark rounded tile
+
+
+ON_TILE = Theme(ink=FG, paper=BG, tile=True)
+ON_LIGHT = Theme(ink=BG, paper="#ffffff", accent="#a87f00")
+ON_DARK = Theme(ink=FG, paper=BG)
+
+
 # ---------------------------------------------------------------- helpers
-def tile(ax, color=BG):
-    """Dark rounded-square background filling the unit square."""
-    ax.add_patch(patches.FancyBboxPatch((0.02, 0.02), 0.96, 0.96, boxstyle="round,pad=0,rounding_size=0.18",
-                                        fc=color, ec="none", zorder=0))
+def tile(ax, t: Theme):
+    """Dark rounded-square background filling the unit square (if the theme has one)."""
+    if t.tile:
+        ax.add_patch(patches.FancyBboxPatch((0.02, 0.02), 0.96, 0.96, boxstyle="round,pad=0,rounding_size=0.18",
+                                            fc=t.paper, ec="none", zorder=0))
 
 
-def text(ax, x, y, s, size, color=FG, weight="bold", **kw):
+def text(ax, x, y, s, size, color, weight="bold", **kw):
     ax.text(x, y, s, fontsize=size, color=color, weight=weight, ha="center", va="center",
             family="DejaVu Sans", **kw)
 
@@ -62,9 +82,9 @@ def moons_xy(n=160):
 
 
 # ---------------------------------------------------------------- the ten logos
-def grid8(ax):
+def grid8(ax, t: Theme):
     """The video's 4 x 2 button grid, coloured by family."""
-    tile(ax)
+    tile(ax, t)
     w, h, gx, gy = 0.17, 0.25, 0.045, 0.07
     x0 = (1 - (4 * w + 3 * gx)) / 2
     y0 = (1 - (2 * h + gy)) / 2
@@ -75,11 +95,11 @@ def grid8(ax):
                                                 fc=FAMILIES[col], ec="none", alpha=0.95 if row == 0 else 0.6))
 
 
-def moons8(ax):
+def moons8(ax, t: Theme):
     """A figure-eight traced through the two-moons data: the book in one mark."""
-    tile(ax)
-    t = np.linspace(0, 2 * np.pi, 400)
-    x, y = 0.5 + 0.2 * np.sin(2 * t), 0.5 + 0.33 * np.sin(t)
+    tile(ax, t)
+    u = np.linspace(0, 2 * np.pi, 400)
+    x, y = 0.5 + 0.2 * np.sin(2 * u), 0.5 + 0.33 * np.sin(u)
     X, lab = moons_xy(220)
     rng = np.random.default_rng(data.SEED)
     keep = rng.random(len(X)) < 0.75
@@ -90,9 +110,9 @@ def moons8(ax):
     ax.plot(x, y, color=YELLOW, lw=9, solid_capstyle="round", zorder=2)
 
 
-def neural8(ax):
+def neural8(ax, t: Theme):
     """A 2-4-2 network whose nodes sit on an '8'."""
-    tile(ax)
+    tile(ax, t)
     layers = [[0.35, 0.65], [0.2, 0.4, 0.6, 0.8], [0.35, 0.65]]
     xs = [0.22, 0.5, 0.78]
     for (xa, la), (xb, lb) in zip(zip(xs, layers), zip(xs[1:], layers[1:])):
@@ -102,12 +122,12 @@ def neural8(ax):
     colors = [BLUE, YELLOW, RED]
     for x, ys, c in zip(xs, layers, colors):
         for yy in ys:
-            ax.add_patch(patches.Circle((x, yy), 0.055, fc=c, ec=BG, lw=3, zorder=2))
+            ax.add_patch(patches.Circle((x, yy), 0.055, fc=c, ec=t.paper, lw=3, zorder=2))
 
 
-def tree8(ax):
+def tree8(ax, t: Theme):
     """A depth-3 decision tree with eight leaves in the four family colours."""
-    tile(ax)
+    tile(ax, t)
     nodes = {(0, 0): (0.5, 0.8)}
     for d in (1, 2, 3):
         for i in range(2 ** d):
@@ -117,57 +137,57 @@ def tree8(ax):
             px, py = nodes[(d - 1, i // 2)]
             ax.plot([px, x], [py, y], color=MUTED, lw=3, zorder=1)
     for (d, i), (x, y) in nodes.items():
-        c = FAMILIES[i // 2] if d == 3 else FG
-        ax.add_patch(patches.Circle((x, y), 0.045 if d == 3 else 0.04, fc=c, ec=BG, lw=2, zorder=2))
+        c = FAMILIES[i // 2] if d == 3 else t.ink
+        ax.add_patch(patches.Circle((x, y), 0.045 if d == 3 else 0.04, fc=c, ec=t.paper, lw=2, zorder=2))
 
 
-def stopwatch(ax):
+def stopwatch(ax, t: Theme):
     """'Slowed down': a stopwatch with an 8 on the dial."""
-    tile(ax)
-    ax.add_patch(patches.Circle((0.5, 0.45), 0.3, fc="none", ec=FG, lw=7))
-    ax.add_patch(patches.FancyBboxPatch((0.44, 0.8), 0.12, 0.06, boxstyle="round,pad=0,rounding_size=0.02", fc=FG))
+    tile(ax, t)
+    ax.add_patch(patches.Circle((0.5, 0.45), 0.3, fc="none", ec=t.ink, lw=7))
+    ax.add_patch(patches.FancyBboxPatch((0.44, 0.8), 0.12, 0.06, boxstyle="round,pad=0,rounding_size=0.02", fc=t.ink))
     for k, c in enumerate(FAMILIES):
         ax.add_patch(patches.Wedge((0.5, 0.45), 0.24, 90 - 90 * (k + 1), 90 - 90 * k, width=0.035, fc=c))
-    text(ax, 0.5, 0.45, "8", 70)
+    text(ax, 0.5, 0.45, "8", 70, t.ink)
 
 
-def monogram(ax):
+def monogram(ax, t: Theme):
     """'ml8' wordmark with a family-coloured underline."""
-    tile(ax)
-    text(ax, 0.5, 0.56, "ml8", 66)
+    tile(ax, t)
+    text(ax, 0.5, 0.56, "ml8", 66, t.ink)
     for k, c in enumerate(FAMILIES):
         ax.add_patch(patches.Rectangle((0.2 + k * 0.15, 0.3), 0.13, 0.05, fc=c))
 
 
-def boundary(ax):
+def boundary(ax, t: Theme):
     """Two-moons scatter split by a curved dashed decision boundary."""
-    tile(ax)
+    tile(ax, t)
     X, lab = moons_xy(200)
     px, py = 0.14 + 0.72 * X[:, 0], 0.18 + 0.64 * X[:, 1]
     ax.scatter(px, py, s=22, c=np.where(lab == 1, RED, BLUE), lw=0, zorder=1)
-    t = np.linspace(0.12, 0.88, 200)
-    ax.plot(t, 0.5 + 0.17 * np.sin((t - 0.12) / 0.76 * 2 * np.pi), color=YELLOW, lw=5, ls=(0, (3, 1.5)), zorder=2)
+    u = np.linspace(0.12, 0.88, 200)
+    ax.plot(u, 0.5 + 0.17 * np.sin((u - 0.12) / 0.76 * 2 * np.pi), color=YELLOW, lw=5, ls=(0, (3, 1.5)), zorder=2)
 
 
-def hexbadge(ax):
+def hexbadge(ax, t: Theme):
     """Hexagon badge split into the four family colours with an 8."""
-    tile(ax)
+    tile(ax, t)
     ang = np.deg2rad(np.arange(6) * 60 + 30)
     hx, hy = 0.5 + 0.38 * np.cos(ang), 0.5 + 0.38 * np.sin(ang)
     for k, c in enumerate(FAMILIES):
         ax.add_patch(patches.Wedge((0.5, 0.5), 0.5, 90 * k, 90 * (k + 1), fc=c, ec="none",
                                    clip_path=None, alpha=0.9))
-    hexagon = patches.Polygon(np.c_[hx, hy], closed=True, fc="none", ec=BG, lw=0)
+    hexagon = patches.Polygon(np.c_[hx, hy], closed=True, fc="none", ec=t.paper, lw=0)
     ax.add_patch(hexagon)
     for p in ax.patches[1:5]:
         p.set_clip_path(hexagon)
-    ax.add_patch(patches.Circle((0.5, 0.5), 0.2, fc=BG, ec="none"))
-    text(ax, 0.5, 0.5, "8", 54)
+    ax.add_patch(patches.Circle((0.5, 0.5), 0.2, fc=t.paper, ec="none"))
+    text(ax, 0.5, 0.5, "8", 54, t.ink)
 
 
-def kmeans(ax):
+def kmeans(ax, t: Theme):
     """Four clusters (one per family) pulled towards their centroids."""
-    tile(ax)
+    tile(ax, t)
     rng = np.random.default_rng(data.SEED)
     centres = [(0.3, 0.68), (0.7, 0.68), (0.3, 0.32), (0.7, 0.32)]
     for (cx, cy), c in zip(centres, FAMILIES):
@@ -175,20 +195,20 @@ def kmeans(ax):
         for x, y in pts:
             ax.plot([cx, x], [cy, y], color=c, lw=1, alpha=0.35, zorder=1)
         ax.scatter(pts[:, 0], pts[:, 1], s=26, color=c, lw=0, zorder=2)
-        ax.scatter([cx], [cy], s=260, marker="P", color=FG, edgecolors=BG, lw=2, zorder=3)
+        ax.scatter([cx], [cy], s=260, marker="P", color=t.ink, edgecolors=t.paper, lw=2, zorder=3)
 
 
-def curves(ax):
+def curves(ax, t: Theme):
     """Gradient descent: a loss curve settling into a sigmoid, with 8 steps."""
-    tile(ax)
-    t = np.linspace(-6, 6, 200)
-    sig = 1 / (1 + np.exp(-t))
-    x = 0.15 + 0.7 * (t + 6) / 12
+    tile(ax, t)
+    u = np.linspace(-6, 6, 200)
+    sig = 1 / (1 + np.exp(-u))
+    x = 0.15 + 0.7 * (u + 6) / 12
     ax.plot(x, 0.2 + 0.6 * sig, color=YELLOW, lw=7, solid_capstyle="round", zorder=2)
     steps = np.linspace(-5.2, 5.2, 8)
     for k, s in enumerate(steps):
         ax.add_patch(patches.Circle((0.15 + 0.7 * (s + 6) / 12, 0.2 + 0.6 / (1 + np.exp(-s))), 0.032,
-                                    fc=FAMILIES[k // 2], ec=BG, lw=2, zorder=3))
+                                    fc=FAMILIES[k // 2], ec=t.paper, lw=2, zorder=3))
 
 
 LOGOS = {f.__name__: f for f in (moons8, grid8, neural8, tree8, stopwatch, monogram, boundary, hexbadge, kmeans, curves)}
@@ -205,11 +225,44 @@ def new_ax(size_in=4.0):
 
 def render(name: str, stem: Path, png_px: int = 512):
     fig, ax = new_ax()
-    LOGOS[name](ax)
+    LOGOS[name](ax, ON_TILE)
     stem.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(stem.with_suffix(".svg"), transparent=True)
     fig.savefig(stem.with_suffix(".png"), dpi=png_px / 4, transparent=True)
     plt.close(fig)
+
+
+def render_wide(name: str, stem: Path, t: Theme, png_height: int = 240):
+    """Wide lockup: the mark on the left, the stacked book title on the right."""
+    width, height = 14.0, 4.0  # height matches render(), so font sizes and line widths in the mark hold
+    fig = plt.figure(figsize=(width, height))
+    fig.patch.set_alpha(0)
+    mark = fig.add_axes([0, 0, height / width, 1])
+    mark.set_xlim(0, 1); mark.set_ylim(0, 1); mark.set_aspect("equal"); mark.axis("off")
+    LOGOS[name](mark, t)
+    left = (height + 0.24) / width
+    for y, s, size, color, weight in ((0.80, "EIGHT ML", 66, t.accent, "bold"),
+                                      (0.45, "Algorithms", 90, t.ink, "normal"),
+                                      (0.13, "Slowed Down", 42, t.ink, "normal")):
+        fig.text(left, y, s, fontsize=size, color=color, weight=weight, ha="left", va="center", family="DejaVu Sans")
+    stem.parent.mkdir(parents=True, exist_ok=True)
+    fig.savefig(stem.with_suffix(".svg"), transparent=True)
+    fig.savefig(stem.with_suffix(".png"), dpi=png_height / height, transparent=True)
+    plt.close(fig)
+
+
+def render_favicon(dest: list[Path]):
+    """A simplified mark that survives 16 px: thick family ring and a large 8, no fine detail."""
+    fig, ax = new_ax()
+    tile(ax, ON_TILE)
+    for k, c in enumerate(FAMILIES):
+        ax.add_patch(patches.Wedge((0.5, 0.5), 0.45, 90 - 90 * (k + 1), 90 - 90 * k, width=0.11, fc=c))
+    text(ax, 0.5, 0.49, "8", 150, FG)
+    buffer = BytesIO()
+    fig.savefig(buffer, format="png", dpi=64, transparent=True)
+    plt.close(fig)
+    for path in dest:
+        Image.open(buffer).save(path, sizes=[(16, 16), (32, 32), (48, 48)])
 
 
 def contact_sheet(paths: list[Path], out: Path):
@@ -226,11 +279,11 @@ def contact_sheet(paths: list[Path], out: Path):
 def install(name: str):
     images = ROOT / "images"
     render(name, images / "logo")
-    icon = Image.open(images / "logo.png")
-    for dest in (images / "favicon.ico", ROOT / "dashboard" / "favicon.ico"):
-        icon.save(dest, sizes=[(16, 16), (32, 32), (48, 48)])
+    render_wide(name, images / "logo-wide-light", ON_LIGHT)
+    render_wide(name, images / "logo-wide-dark", ON_DARK)
+    render_favicon([images / "favicon.ico", ROOT / "dashboard" / "favicon.ico"])
     shutil.copy(images / "logo.png", ROOT / "dashboard" / "logo.png")
-    print(f"installed '{name}' -> images/logo.svg, images/logo.png, images/favicon.ico, dashboard/favicon.ico")
+    print(f"installed '{name}' -> images/logo*.svg|png, images/favicon.ico, dashboard/favicon.ico, dashboard/logo.png")
 
 
 def main():

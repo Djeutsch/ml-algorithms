@@ -1,5 +1,8 @@
 <p align="center">
-  <img src="images/logo.png" alt="Eight ML Algorithms logo" width="128">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="images/logo-wide-dark.png">
+    <img src="images/logo-wide-light.png" alt="Eight ML Algorithms, Slowed Down" width="360">
+  </picture>
 </p>
 
 # Eight ML Algorithms, Slowed Down
@@ -137,6 +140,9 @@ python scripts/build_standalone_dashboard.py    # dashboard/page.html → dashbo
 - Edit chapters in `src/` (Jupytext percent scripts). `notebooks/` is generated from them,
   so edits made directly to the notebooks are overwritten.
 - Model settings live in `ml8/models.py` and datasets in `ml8/data.py`.
+- Each chapter starts with a visible **Imports** section: a table of the `ml8` functions it
+  uses and a cell importing only what the chapter needs. If you use something new in a
+  chapter, add its import to that cell and update the table.
 - Commit the regenerated `notebooks/` and `dashboard/` files. CI builds the book from the
   stored outputs and doesn't re-execute anything.
 
@@ -151,10 +157,19 @@ python scripts/generate_logos.py                   # → logos/candidates/*.svg|
 python scripts/generate_logos.py --use stopwatch   # install one as the logo
 ```
 
-`--use` writes `images/logo.svg`, `images/logo.png` and `images/favicon.ico` (used by
-`myst.yml`), plus `dashboard/favicon.ico` and `dashboard/logo.png`. The current logo is
-**stopwatch**: an 8 on a stopwatch dial ringed in the four family colours, for "eight
-algorithms, slowed down".
+`--use` writes:
+
+- `images/logo-wide-light.svg` and `images/logo-wide-dark.svg`: the wide logo the book shows,
+  one per theme, with PNG copies for this README
+- `images/logo.svg` and `images/logo.png`: the square version on its dark tile
+- `images/favicon.ico` and `dashboard/favicon.ico`: a simplified mark that stays legible at 16 px
+- `dashboard/logo.png`: the square logo for the dashboard's top link
+
+The current logo is **stopwatch**: an 8 on a stopwatch dial ringed in the four family colours,
+for "eight algorithms, slowed down".
+
+The MyST theme normally keeps the logo in the top bar. `book.css` moves it to the top of the
+left sidebar on wide screens; on narrower screens it stays in the top bar.
 
 ![The ten logo candidates](logos/contact_sheet.png)
 
@@ -165,6 +180,7 @@ algorithms, slowed down".
 ```
 .
 ├── myst.yml, intro.md          Jupyter Book 2 (MyST) configuration and landing page
+├── book.css                    places the logo at the top of the book's sidebar
 ├── notebooks/                  executed chapters 00–09 (generated)
 ├── src/                        chapter sources (Jupytext percent format)
 ├── ml8/                        shared code: data, from-scratch formulas, models, plot style
@@ -173,7 +189,7 @@ algorithms, slowed down".
 │   ├── export_dashboard_data.py     ml8 → dashboard/data/*.csv
 │   ├── build_standalone_dashboard.py  page.html → index.html
 │   └── generate_logos.py            ten logo candidates + install the chosen one
-├── images/                     logo and favicon used by the book
+├── images/                     logos and favicon used by the book
 ├── logos/                      generated logo candidates and contact sheet
 ├── dashboard/
 │   ├── index.html              standalone dashboard (generated)

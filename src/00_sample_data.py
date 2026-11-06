@@ -11,8 +11,56 @@
 # | Two moons | Tree, forest, boosting, KNN, neural net | 400 points, noise 0.3, 70/30 stratified train/test split |
 # | Blobs | k-means | 150 points in three Gaussian clusters |
 
+# %% [markdown]
+# ## How the notebooks import code
+#
+# Every chapter opens with an **Imports** cell. It loads two kinds of code:
+#
+# - **Installed packages** (NumPy, pandas, Matplotlib, scikit-learn), which come from
+#   `pip install -r requirements.txt`.
+# - **The book's own package, `ml8`**, which is a folder in this repository rather than
+#   something you install:
+#
+# ```text
+# eight-ml-algorithms/
+# ├── ml8/
+# │   ├── data.py        the four datasets on this page
+# │   ├── scratch.py     the formulas, written from scratch in NumPy
+# │   ├── models.py      scikit-learn models with the book's settings
+# │   └── plotting.py    the colours and plot helpers
+# └── notebooks/         you are here
+# ```
+#
+# | Import | File | Used as |
+# |---|---|---|
+# | `from ml8 import data` | `ml8/data.py` | `data.moons_arrays()` |
+# | `from ml8 import scratch` | `ml8/scratch.py` | `scratch.gini(labels)` |
+# | `from ml8 import models` | `ml8/models.py` | `models.tree(depth=3)` |
+# | `from ml8 import plotting as P` | `ml8/plotting.py` | `P.plot_surface(...)`, `P.BLUE` |
+#
+# Python only finds `ml8` if its parent folder is on the search path, and the notebooks run
+# from `notebooks/`, one level below it. That is what `sys.path.insert(0, "..")` does, so
+# it needs to run before any `ml8` import.
+#
+# Here is the full cell for this page. Each chapter's cell has the same shape and imports
+# only what that chapter uses.
+
 # %%
-#SETUP
+# ml8 sits one folder above notebooks/, so put that folder on Python's search path
+import sys
+sys.path.insert(0, "..")
+
+# Installed packages
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+
+# The book's own modules
+from ml8 import data              # ml8/data.py: the seeded sample datasets
+from ml8 import plotting as P     # ml8/plotting.py: colours and plot helpers
+
+P.use_style()  # the dark style used by every figure
+pd.set_option("display.precision", 4)
 
 # %%
 reg, lg, moons, blobs = data.regression_data(), data.logistic_data(), data.moons_data(), data.blobs_data()

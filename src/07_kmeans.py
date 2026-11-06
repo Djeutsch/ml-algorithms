@@ -16,8 +16,37 @@
 # Each step can only lower the inertia $\sum_j \sum_{i\in C_j}\lVert x_i - \mu_j\rVert^2$,
 # so the loop always stops, though not necessarily at the best clustering.
 
+# %% [markdown]
+# ## Imports
+#
+# `ml8` is the book's own package; [The sample data](00_sample_data.ipynb) explains how it is
+# imported. This chapter uses:
+#
+# | File | What this chapter uses |
+# |---|---|
+# | `ml8/data.py` | `data.blobs_data`: the three-blob sample |
+# | `ml8/scratch.py` | `scratch.inertia`: the k-means objective<br>`scratch.kmeans_lloyd`: Lloyd's k-means algorithm |
+# | `ml8/plotting.py` | the palette (`P.BLUE`, `P.FG`, `P.GREEN`, `P.PURPLE`, `P.RED`, `P.YELLOW`) |
+
 # %%
-#SETUP
+# ml8 sits one folder above notebooks/, so put that folder on Python's search path
+import sys
+sys.path.insert(0, "..")
+
+# Installed packages
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+from sklearn.cluster import KMeans
+from sklearn.metrics import adjusted_rand_score
+
+# The book's own modules
+from ml8 import data              # ml8/data.py: the seeded sample datasets
+from ml8 import plotting as P     # ml8/plotting.py: colours and plot helpers
+from ml8 import scratch           # ml8/scratch.py: the from-scratch formulas
+
+P.use_style()  # the dark style used by every figure
+pd.set_option("display.precision", 4)
 
 # %%
 blobs = data.blobs_data()
@@ -40,9 +69,6 @@ plt.tight_layout()
 # ## Check against scikit-learn
 
 # %%
-from sklearn.cluster import KMeans
-from sklearn.metrics import adjusted_rand_score
-
 sk = KMeans(n_clusters=3, n_init=10, random_state=0).fit(X)
 pd.DataFrame({"inertia": [scratch.inertia(X, cents[-1], assigns[-1]), sk.inertia_],
               "ARI vs true groups": [adjusted_rand_score(blobs.true_cluster, assigns[-1]), adjusted_rand_score(blobs.true_cluster, sk.labels_)]},

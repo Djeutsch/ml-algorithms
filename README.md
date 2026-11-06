@@ -9,9 +9,7 @@
 
 [![Deploy book and dashboard](https://github.com/Djeutsch/ml-algorithms/actions/workflows/deploy.yml/badge.svg)](https://github.com/Djeutsch/ml-algorithms/actions/workflows/deploy.yml)
 
-An interactive dashboard and a Jupyter Book that unpack an "8 algorithms · under 60 seconds"
-video: linear regression, logistic regression, decision tree, random forest, gradient
-boosting, k-nearest neighbours, k-means and a neural network. Each is run on small, seeded
+An interactive dashboard and a Jupyter Book that unpack the main everyday work of machine learning: linear regression, logistic regression, decision tree, random forest, gradient boosting, k-nearest neighbours, k-means and a neural network. Each is run on small, seeded
 sample data, and the dashboard and book always show the same numbers.
 
 | | Live link | Source |

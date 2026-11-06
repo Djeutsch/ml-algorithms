@@ -1,7 +1,14 @@
-# Eight ML algorithms, slowed down
+# Eight ML Algorithms, Slowed Down
 
-The source video packs eight machine-learning algorithms into about forty seconds
-("8 algorithms · under 60 seconds"). Each gets one formula, one toy dataset and a few
+From predicting house prices to filtering spam, recommending films and recognising faces, eight algorithms do much of the everyday work of machine learning.
+- Linear regression predicts a house’s price from its size.
+- Logistic regression decides whether an email is spam. 
+- Decision trees, random forests and gradient boosting learn chains of yes-or-no questions, the approach behind many credit-scoring and clinical risk models.
+- K-nearest neighbours recommends what similar people liked. 
+- K-means sorts customers, or lab samples, into groups without being told what the groups are. 
+- Neural networks learn the curved, layered patterns behind image and speech recognition.
+
+Here each one gets one formula and runs on small sample data (one toy dataset), so you can watch it learn one step at a time with a few
 frames of animation, while a grid of eight buttons lights up in four colour families.
 
 ```{tip}

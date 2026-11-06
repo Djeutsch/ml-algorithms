@@ -60,9 +60,10 @@
     calc() {}, loader() {}, refresh() {},
   };
 
-  // Re-run drawings when a hidden section is shown, and when the width changes.
+  // Re-run drawings when a hidden section is shown, and when the width changes. Tooltips
+  // are skipped: redrawing a chart removes its tooltip, so one could never appear.
   new MutationObserver((muts) => {
-    if (muts.some((m) => m.attributeName === 'hidden' && !m.target.hidden)) schedule();
+    if (muts.some((m) => m.attributeName === 'hidden' && !m.target.hidden && !m.target.matches('.ml-tip'))) schedule();
   }).observe(document.documentElement, { attributes: true, attributeFilter: ['hidden'], subtree: true });
   let lastW = window.innerWidth;
   window.addEventListener('resize', () => { if (window.innerWidth !== lastW) { lastW = window.innerWidth; schedule(); } });

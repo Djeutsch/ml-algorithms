@@ -49,6 +49,7 @@ HEAD = """<!doctype html>
       color-scheme: dark;
     }
   }
+  [hidden] { display: none !important; }
   html, body { margin: 0; background: var(--color-bg); color: var(--color-fg); }
   body { font-family: var(--font-sans); font-size: var(--cds-font-size-body); line-height: 1.4; }
   #dash-root { padding-block: 24px 48px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }

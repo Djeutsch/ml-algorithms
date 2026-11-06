@@ -1,24 +1,188 @@
-/* Wide logo at the top of the left sidebar. The MyST theme keeps the logo in the top
-   bar and has no sidebar header, so on wide screens the logo is moved down into the
-   sidebar column and the table of contents starts below it. */
+/* Page layout for the book: logo and search at the top of a full-height left sidebar,
+   no top bar, and an author footer under the main column.
+
+   The MyST theme has no settings for this, so it is done here. On wide screens the top
+   bar collapses to zero height and its contents join the sidebar's grid column. The
+   rules depend on the theme's class names and grid (see --book-grid below), so re-check
+   the layout when changing the jupyter-book version pinned in deploy.yml. */
+
+:root {
+  --book-rule: #d8dade;
+}
+
+html.dark {
+  --book-rule: #3a3f4a;
+}
+
+/* Narrow screens keep the theme's top bar, which has room for a small logo */
 .myst-home-link-logo img {
   height: 2.75rem;
   max-width: none;
 }
 
+/* Footer: author line and licence badges, aligned with the text column */
+footer.footer {
+  background: transparent !important;
+  border-top: 1px solid var(--book-rule);
+  box-shadow: none;
+  column-gap: 0.25rem; /* the footer lacks the article's gaps, which shifts its columns */
+  margin-top: 3rem;
+  padding-block: 1rem;
+}
+
+/* Font size is set here, not on the footer: the grid's columns are in ch, so a smaller
+   font on the footer itself would shift them out of line with the article */
+footer.footer > * {
+  font-size: 0.875rem;
+  grid-column: body;
+  margin-block: 0.25rem;
+}
+
+footer.footer img {
+  display: inline;
+  margin: 0 !important;
+}
+
+footer.footer a {
+  margin-right: 0.25rem;
+}
+
+footer.footer .link-icon {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  footer.footer {
+    column-gap: 0.5rem;
+  }
+}
+
 @media (min-width: 1280px) {
-  .myst-home-link-logo {
+  :root {
+    --book-edge: 0.25rem;
+    --book-gap: 0.75rem;
+    --book-sidebar-inset: 1rem;
+    --book-header-height: 9.25rem;
+    /* The theme's .article-grid columns at this width, with gutters as variables */
+    --book-grid: [screen-start] var(--book-edge) [screen-inset-start] 1fr [page-start] 3rem
+      [page-inset-start] minmax(4rem, 9rem) [body-outset-start] 3rem [body-start gutter-left-start] 1rem
+      [body-inset-start] minmax(8ch, 10ch) [middle-start] minmax(8ch, 10ch) [gutter-left-end] minmax(8ch, 10ch)
+      minmax(8ch, 10ch) [gutter-right-start] minmax(8ch, 10ch) [middle-end] minmax(8ch, 10ch) [body-inset-end] 1rem
+      [body-end gutter-right-end] 3rem [body-outset-end] minmax(5rem, 13rem) [page-inset-end] 3rem [page-end] 1fr
+      [screen-inset-end] var(--book-edge) [screen-end];
+  }
+
+  /* Top bar: no height or background; its grid only places the items below */
+  .myst-top-nav {
+    backdrop-filter: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
     height: 0;
+    min-height: 0;
+    padding: 0;
+    pointer-events: none;
+  }
+
+  .myst-top-nav-bar {
+    align-items: center;
+    column-gap: var(--book-gap);
+    display: grid;
+    grid-template-columns: var(--book-grid);
+    max-width: none;
+    padding-top: 1rem;
+    row-gap: 0.75rem;
+  }
+
+  /* Unwrap the bar's two groups so the logo, search and theme button are grid items */
+  .myst-top-nav-bar > div {
+    display: contents;
+  }
+
+  .myst-top-nav-bar > div > div {
+    display: none;
+  }
+
+  .myst-home-link,
+  .myst-search-bar,
+  .myst-theme-button {
+    pointer-events: auto;
+  }
+
+  /* Logo, then search, in the sidebar's column */
+  .myst-home-link {
+    grid-column: page / body-start;
+    grid-row: 1;
+    margin: 0 calc(var(--book-sidebar-inset) + 0.75rem) 0 0;
+    width: auto;
+  }
+
+  .myst-home-link-logo {
     margin: 0;
     padding: 0;
-    position: relative;
-    left: -2rem;
-    top: 5rem;
+    width: 100%;
   }
+
   .myst-home-link-logo img {
     height: 4.75rem;
+    max-width: 100%;
+    object-fit: contain;
+    object-position: left;
+    width: 100%;
   }
+
+  .myst-search-bar {
+    aspect-ratio: auto;
+    border-radius: 9999px;
+    grid-column: page / body-start;
+    grid-row: 2;
+    margin: 0 calc(var(--book-sidebar-inset) + 0.75rem) 0 0;
+    width: auto;
+  }
+
+  /* Theme button: at the end of the page's icon row */
+  .myst-theme-button {
+    align-self: start;
+    grid-column: body-end / body-outset-end;
+    grid-row: 1;
+    justify-self: start;
+    margin: 0.9rem 0 0;
+  }
+
+  /* Sidebar: full height with a rule on its right, contents below the logo and search */
+  .myst-primary-sidebar {
+    top: 0 !important;
+  }
+
+  .myst-primary-sidebar-pointer {
+    border-right: 1px solid var(--book-rule);
+    height: 100vh !important;
+    margin-right: calc(var(--book-sidebar-inset) - 1px);
+    padding-top: var(--book-header-height);
+  }
+
   .myst-primary-sidebar-nav {
-    margin-top: 4.75rem;
+    padding-top: 0.5rem;
+  }
+
+  /* Footer rule starts at the sidebar, as the sidebar runs the full page height */
+  footer.footer {
+    border-top: 0;
+    column-gap: var(--book-gap);
+  }
+
+  footer.footer::before {
+    border-top: 1px solid var(--book-rule);
+    content: "";
+    grid-column: body-start / screen-end;
+    grid-row: 1;
+    margin-left: calc(-1 * var(--book-gap) - var(--book-sidebar-inset));
+    margin-top: -1rem;
+  }
+}
+
+@media (min-width: 1536px) {
+  :root {
+    --book-edge: 0.5rem;
+    --book-gap: 1rem;
   }
 }

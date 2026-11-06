@@ -1,31 +1,39 @@
-"""Generate ten candidate logos for the book and install the chosen one.
+"""Generate the book's candidate logos and install the chosen one.
 
-Every logo is drawn with matplotlib in the book's own palette (ml8.plotting). The
-square version sits on a dark rounded tile. The chosen logo is also built into a
-wide lockup (mark on the left, stacked title on the right) with no background, in
-one version per book theme, for the top of the book's sidebar.
+Most candidates are drawn here with matplotlib in the book's own palette
+(ml8.plotting), as a square on a dark rounded tile. Any other logo can join them:
+save it as logos/candidates/NN_<name>.svg and .png, and it is treated the same way.
+
+Every candidate also gets a wide lockup (mark on the left, stacked title on the
+right) with no background, in one version per book theme. That is what the book
+shows at the top of its sidebar.
 
 Usage:
-    python scripts/generate_logos.py                 # draw all ten + contact sheet
+    python scripts/generate_logos.py                 # draw every candidate and wide logo
     python scripts/generate_logos.py --use moons8    # also install one as the site logo
     python scripts/generate_logos.py --list          # show the candidates
 
 Outputs:
-    logos/candidates/NN_<name>.svg / .png   every candidate (512 px PNG)
-    logos/contact_sheet.png                 all ten side by side, for picking
-    images/logo.svg, images/logo.png        the chosen logo, square tile (--use)
-    images/logo-wide-light.svg / -dark.svg  wide lockups for the book (--use)
-    images/logo-wide-light.png / -dark.png  the same, for the README (--use)
-    images/favicon.ico                      16/32/48 px icon  (--use)
-    dashboard/favicon.ico                   same icon for the dashboard (--use)
+    logos/candidates/NN_<name>.svg / .png        every candidate (512 px PNG)
+    logos/contact_sheet.png                      all candidates side by side, for picking
+    logos/contact_sheet_wide.png                 all wide logos on both backgrounds
+    images/logos-wide/<name>-light.svg / .png    wide logo for the light theme
+    images/logos-wide/<name>-dark.svg / .png     wide logo for the dark theme
+    images/logo-wide-light.svg / -dark.svg       the chosen wide logo (--use)
+    images/logo-wide-light.png / -dark.png       the same, for the README (--use)
+    images/logo.svg, images/logo.png             the chosen logo, square (--use)
+    images/favicon.ico, dashboard/favicon.ico    16/32/48 px icon (--use)
+    dashboard/logo.png                           square logo for the dashboard (--use)
 """
 from __future__ import annotations
 
 import argparse
+import math
+import re
 import shutil
 import sys
 from dataclasses import dataclass
-from io import BytesIO
+from io import BytesIO, StringIO
 from pathlib import Path
 
 import matplotlib
@@ -42,9 +50,13 @@ from ml8 import data  # noqa: E402
 from ml8.plotting import BG, BLUE, FG, GREEN, PURPLE, RED, YELLOW  # noqa: E402
 
 CANDIDATES_DIR = ROOT / "logos" / "candidates"
+IMAGES_DIR = ROOT / "images"
+WIDE_DIR = IMAGES_DIR / "logos-wide"
 FAMILIES = [BLUE, GREEN, PURPLE, YELLOW]  # same order as the video's button grid
 MUTED = "#8b949e"
 plt.rcParams["svg.fonttype"] = "path"  # text becomes outlines: no font needed to view the SVG
+plt.rcParams["svg.hashsalt"] = "ml8"   # with no Date in SVG_METADATA, reruns give identical files
+SVG_METADATA = {"Date": None}
 
 
 @dataclass(frozen=True)
@@ -57,7 +69,7 @@ class Theme:
 
 ON_TILE = Theme(ink=FG, paper=BG, tile=True)
 ON_LIGHT = Theme(ink=BG, paper="#ffffff", accent="#a87f00")
-ON_DARK = Theme(ink=FG, paper=BG)
+ON_DARK = Theme(ink=FG, paper="#1c1917")  # the book's dark page background
 
 
 # ---------------------------------------------------------------- helpers
@@ -81,7 +93,7 @@ def moons_xy(n=160):
     return X, df.label.to_numpy()
 
 
-# ---------------------------------------------------------------- the ten logos
+# ---------------------------------------------------------------- the drawn logos
 def grid8(ax, t: Theme):
     """The video's 4 x 2 button grid, coloured by family."""
     tile(ax, t)
@@ -174,13 +186,12 @@ def hexbadge(ax, t: Theme):
     tile(ax, t)
     ang = np.deg2rad(np.arange(6) * 60 + 30)
     hx, hy = 0.5 + 0.38 * np.cos(ang), 0.5 + 0.38 * np.sin(ang)
-    for k, c in enumerate(FAMILIES):
-        ax.add_patch(patches.Wedge((0.5, 0.5), 0.5, 90 * k, 90 * (k + 1), fc=c, ec="none",
-                                   clip_path=None, alpha=0.9))
+    wedges = [ax.add_patch(patches.Wedge((0.5, 0.5), 0.5, 90 * k, 90 * (k + 1), fc=c, ec="none", alpha=0.9))
+              for k, c in enumerate(FAMILIES)]
     hexagon = patches.Polygon(np.c_[hx, hy], closed=True, fc="none", ec=t.paper, lw=0)
     ax.add_patch(hexagon)
-    for p in ax.patches[1:5]:
-        p.set_clip_path(hexagon)
+    for wedge in wedges:
+        wedge.set_clip_path(hexagon)
     ax.add_patch(patches.Circle((0.5, 0.5), 0.2, fc=t.paper, ec="none"))
     text(ax, 0.5, 0.5, "8", 54, t.ink)
 
@@ -214,6 +225,12 @@ def curves(ax, t: Theme):
 LOGOS = {f.__name__: f for f in (moons8, grid8, neural8, tree8, stopwatch, monogram, boundary, hexbadge, kmeans, curves)}
 
 
+def added_logos() -> dict[str, Path]:
+    """Candidates saved in logos/candidates/ by hand, as {name: path without suffix}."""
+    stems = (path.with_suffix("") for path in sorted(CANDIDATES_DIR.glob("[0-9]*_*.svg")))
+    return {stem.name.split("_", 1)[1]: stem for stem in stems if stem.name.split("_", 1)[1] not in LOGOS}
+
+
 # ---------------------------------------------------------------- output
 def new_ax(size_in=4.0):
     fig = plt.figure(figsize=(size_in, size_in))
@@ -227,9 +244,22 @@ def render(name: str, stem: Path, png_px: int = 512):
     fig, ax = new_ax()
     LOGOS[name](ax, ON_TILE)
     stem.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(stem.with_suffix(".svg"), transparent=True)
+    fig.savefig(stem.with_suffix(".svg"), transparent=True, metadata=SVG_METADATA)
     fig.savefig(stem.with_suffix(".png"), dpi=png_px / 4, transparent=True)
     plt.close(fig)
+
+
+def embed_svg(svg: str, mark: Path, size: float) -> str:
+    """Nest the SVG file `mark` in `svg` as a size x size square at the top left."""
+    source = mark.read_text()
+    view_box = re.search(r'viewBox="([^"]+)"', source).group(1)
+    body = source[source.index(">", source.index("<svg")) + 1:source.rindex("</svg>")]
+    body = re.sub(r"<metadata>.*?</metadata>", "", body, flags=re.S)
+    body = re.sub(r'\bid="', 'id="mark-', body)  # keep ids distinct from the title's
+    body = re.sub(r'(href="#|url\(#)', r"\1mark-", body)
+    nested = f'<svg x="0" y="0" width="{size}" height="{size}" viewBox="{view_box}">{body}</svg>\n'
+    end = svg.rindex("</svg>")
+    return svg[:end] + nested + svg[end:]
 
 
 def render_wide(name: str, stem: Path, t: Theme, png_height: int = 240):
@@ -239,14 +269,22 @@ def render_wide(name: str, stem: Path, t: Theme, png_height: int = 240):
     fig.patch.set_alpha(0)
     mark = fig.add_axes([0, 0, height / width, 1])
     mark.set_xlim(0, 1); mark.set_ylim(0, 1); mark.set_aspect("equal"); mark.axis("off")
-    LOGOS[name](mark, t)
+    added = added_logos().get(name)
+    if added is None:
+        LOGOS[name](mark, t)
     left = (height + 0.24) / width
     for y, s, size, color, weight in ((0.80, "EIGHT ML", 66, t.accent, "bold"),
                                       (0.45, "Algorithms", 90, t.ink, "normal"),
                                       (0.13, "Slowed Down", 42, t.ink, "normal")):
         fig.text(left, y, s, fontsize=size, color=color, weight=weight, ha="left", va="center", family="DejaVu Sans")
+    buffer = StringIO()
+    fig.savefig(buffer, format="svg", transparent=True, metadata=SVG_METADATA)
+    svg = buffer.getvalue()
+    if added is not None:  # an added logo has no drawing code: reuse its files
+        svg = embed_svg(svg, added.with_suffix(".svg"), height * 72)
+        mark.imshow(plt.imread(added.with_suffix(".png")), extent=(0, 1, 0, 1))
     stem.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(stem.with_suffix(".svg"), transparent=True)
+    stem.with_suffix(".svg").write_text(svg)
     fig.savefig(stem.with_suffix(".png"), dpi=png_height / height, transparent=True)
     plt.close(fig)
 
@@ -266,35 +304,66 @@ def render_favicon(dest: list[Path]):
 
 
 def contact_sheet(paths: list[Path], out: Path):
-    fig, axes = plt.subplots(2, 5, figsize=(15, 7))
+    cols = 4
+    rows = math.ceil(len(paths) / cols)
+    fig, axes = plt.subplots(rows, cols, figsize=(3 * cols, 3.4 * rows))
     fig.patch.set_facecolor("#f4f4f2")
+    for ax in axes.flat:
+        ax.axis("off")
     for ax, (k, path) in zip(axes.flat, enumerate(paths, 1)):
-        ax.imshow(plt.imread(path)); ax.axis("off")
+        ax.imshow(plt.imread(path))
         ax.set_title(f"{k:02d} · {path.stem.split('_', 1)[1]}", fontsize=12, color="#1b1d22")
     fig.tight_layout()
     fig.savefig(out, dpi=90, facecolor=fig.get_facecolor())
     plt.close(fig)
 
 
+def wide_contact_sheet(names: list[str], out: Path):
+    """Every wide logo on the background it was made for: light left, dark right."""
+    fig, axes = plt.subplots(len(names), 2, figsize=(9, 1.5 * len(names)))
+    for row, name in zip(axes, names):
+        for ax, theme, paper in zip(row, ("light", "dark"), (ON_LIGHT.paper, ON_DARK.paper)):
+            ax.imshow(plt.imread(WIDE_DIR / f"{name}-{theme}.png"))
+            ax.set_facecolor(paper)
+            ax.set_xticks([]); ax.set_yticks([])
+            for spine in ax.spines.values():
+                spine.set_visible(False)
+        row[0].set_ylabel(name, rotation=0, ha="right", va="center", fontsize=10)
+    fig.tight_layout()
+    fig.savefig(out, dpi=90, facecolor="#f4f4f2")
+    plt.close(fig)
+
+
 def install(name: str):
-    images = ROOT / "images"
-    render(name, images / "logo")
-    render_wide(name, images / "logo-wide-light", ON_LIGHT)
-    render_wide(name, images / "logo-wide-dark", ON_DARK)
-    render_favicon([images / "favicon.ico", ROOT / "dashboard" / "favicon.ico"])
-    shutil.copy(images / "logo.png", ROOT / "dashboard" / "logo.png")
-    print(f"installed '{name}' -> images/logo*.svg|png, images/favicon.ico, dashboard/favicon.ico, dashboard/logo.png")
+    for theme in ("light", "dark"):
+        for suffix in (".svg", ".png"):
+            shutil.copy(WIDE_DIR / f"{name}-{theme}{suffix}", IMAGES_DIR / f"logo-wide-{theme}{suffix}")
+    square = next(CANDIDATES_DIR.glob(f"[0-9]*_{name}.svg")).with_suffix("")
+    for suffix in (".svg", ".png"):
+        shutil.copy(square.with_suffix(suffix), IMAGES_DIR / f"logo{suffix}")
+    shutil.copy(IMAGES_DIR / "logo.png", ROOT / "dashboard" / "logo.png")
+
+    icons = [IMAGES_DIR / "favicon.ico", ROOT / "dashboard" / "favicon.ico"]
+    if name == "stopwatch":
+        render_favicon(icons)
+    else:
+        for path in icons:
+            Image.open(IMAGES_DIR / "logo.png").save(path, sizes=[(16, 16), (32, 32), (48, 48)])
+    print(f"installed '{name}': images/logo*, images/favicon.ico, dashboard/favicon.ico, dashboard/logo.png")
 
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--use", choices=LOGOS, help="install this candidate as the book and dashboard logo")
+    added = added_logos()
+    ap.add_argument("--use", choices=[*LOGOS, *added], help="install this candidate as the book and dashboard logo")
     ap.add_argument("--list", action="store_true", help="list the candidates and exit")
     args = ap.parse_args()
 
     if args.list:
         for k, (name, f) in enumerate(LOGOS.items(), 1):
-            print(f"{k:02d}  {name:<10} {f.__doc__}")
+            print(f"{k:02d}  {name:<18} {f.__doc__}")
+        for name, stem in added.items():
+            print(f"{stem.name.split('_')[0]}  {name:<18} Added to logos/candidates/ by hand.")
         return
 
     paths = []
@@ -302,8 +371,16 @@ def main():
         stem = CANDIDATES_DIR / f"{k:02d}_{name}"
         render(name, stem)
         paths.append(stem.with_suffix(".png"))
+    paths += [stem.with_suffix(".png") for stem in added.values()]
     contact_sheet(paths, ROOT / "logos" / "contact_sheet.png")
-    print(f"wrote {len(paths)} candidates to logos/candidates/ and logos/contact_sheet.png")
+
+    names = [*LOGOS, *added]
+    for name in names:
+        render_wide(name, WIDE_DIR / f"{name}-light", ON_LIGHT)
+        render_wide(name, WIDE_DIR / f"{name}-dark", ON_DARK)
+    wide_contact_sheet(names, ROOT / "logos" / "contact_sheet_wide.png")
+    print(f"wrote {len(names)} candidates to logos/candidates/, their wide versions to images/logos-wide/, "
+          "and two contact sheets to logos/")
 
     if args.use:
         install(args.use)

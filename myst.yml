@@ -3,6 +3,8 @@ project:
   title: Eight ML Algorithms, Slowed Down
   description: A companion book to an "8 algorithms in under 60 seconds" video, with from-scratch code and sample data.
   keywords: [machine learning, scikit-learn, numpy, tutorial]
+  authors:
+    - name: Laique M. Djeutchouang
   license:
     content: CC-BY-4.0
     code: MIT
@@ -25,6 +27,8 @@ project:
     - file: notebooks/09_comparison.ipynb
 site:
   template: book-theme
+  parts:
+    footer: footer.md
   options:
     folders: true
     logo: images/logo-wide-light.svg
@@ -32,3 +36,4 @@ site:
     logo_alt: Eight ML Algorithms, Slowed Down
     favicon: images/favicon.ico
     style: book.css
+    hide_authors: true
